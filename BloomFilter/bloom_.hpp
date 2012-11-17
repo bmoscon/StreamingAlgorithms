@@ -50,8 +50,6 @@
 #ifndef __BLOOM_FILTER_INTERFACE__
 #define __BLOOM_FILTER_INTERFACE__
 
-#include <string>
-
 template <class S, class T>
 class Bloom {
 public:
