@@ -57,10 +57,6 @@ public:
   virtual void add(const T &s) = 0;
   virtual bool exists(const T &s) const = 0;
 
-private:
-  // return by value ok thanks to copy elision/RVO
-  virtual std::vector<S> hash(const T &s) const = 0; 
- 
 };
 
 #endif

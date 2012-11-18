@@ -67,33 +67,21 @@ public:
     hash_list_(hash_list) {}
         
   virtual void add(const T &s) {
-    std::vector<S> hash_vals(hash_list_.size());
-        
-    hash_vals = hash(s);
-	
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      ++bloom_array_[hash_vals[i]];
+      ++bloom_array_[(*hash_list_[i])(s)];
     }
   }
 
   virtual void remove(const T &s) {
-    std::vector<S> hash_vals(hash_list_.size());
-        
-    hash_vals = hash(s);
-	
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      --bloom_array_[hash_vals[i]];
+      --bloom_array_[(*hash_list_[i])(s)];
     }
   }
 
     
   virtual bool exists(const T &s) const {
-    std::vector<S> hash_vals(hash_list_.size());
-    
-    hash_vals = hash(s);
-        
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      if (!bloom_array_[hash_vals[i]]) {
+      if (!bloom_array_[(*hash_list_[i])(s)]) {
 	return (false);
       }
     }
@@ -102,17 +90,6 @@ public:
   }
     
 private:
-  // return by value ok thanks to copy elision/RVO
-  virtual std::vector<S> hash(const T &s) const {
-    std::vector<S> ret(hash_list_.size());
-    
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      ret[i] = (*hash_list_[i])(s);
-    }
-    
-    return (ret);
-  }
-  
   
   std::vector<U> bloom_array_;
   std::vector<hash_function> hash_list_;
