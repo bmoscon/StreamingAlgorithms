@@ -1,8 +1,8 @@
 /*
- * counting_bloom.hpp
+ * spectral_bloom.hpp
  *
  *
- * Counting Bloom Filter Implementation
+ * Spectral Bloom Filter Implementation
  *
  *
  * Copyright (C) 2012  Bryant Moscon - bmoscon@gmail.com
@@ -46,53 +46,44 @@
  *
  */
 
-#ifndef __COUNTING_BLOOM_FILTER__
-#define __COUNTING_BLOOM_FILTER__
+#ifndef __SPECTRAL_BLOOM_FILTER__
+#define __SPECTRAL_BLOOM_FILTER__
 
 #include <vector>
 #include <limits>
 #include <stdint.h>
 
 
-#include "bloom_.hpp"
+#include "counting_bloom.hpp"
 
 template <class S, class T, class U>
-class CountingBloomFilter : Bloom<S, T> {
+class SpectralBloomFilter : public CountingBloomFilter<S, T, U> {
 public:
   typedef S (*hash_function)(const T &s);
     
     
-  CountingBloomFilter(const std::vector<hash_function> &hash_list) : 
-    bloom_array_(std::numeric_limits<S>::max(), false), 
-    hash_list_(hash_list) {}
+  SpectralBloomFilter(const std::vector<hash_function> &hash_list) : 
+    CountingBloomFilter<S,T,U>(hash_list) {}
         
-  virtual void add(const T &s) {
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      ++bloom_array_[(*hash_list_[i])(s)];
-    }
-  }
-
-  virtual void remove(const T &s) {
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      --bloom_array_[(*hash_list_[i])(s)];
-    }
-  }
-
+  
+  U occurrences(const T &s) const {
     
-  virtual bool exists(const T &s) const {
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      if (!bloom_array_[(*hash_list_[i])(s)]) {
-	return (false);
+    uint64_t return_val = std::numeric_limits<uint64_t>::max();
+    uint64_t compare_val;
+    
+    for (uint32_t i = 0; i < parent::hash_list_.size(); ++i) {
+      compare_val = parent::bloom_array_[(*parent::hash_list_[i])(s)];
+      if (compare_val < return_val) {
+	return_val = compare_val;
       }
     }
     
-    return (true);
+    return ((U)return_val);
   }
-    
-protected:
-  
-  std::vector<U> bloom_array_;
-  std::vector<hash_function> hash_list_;
+
+private:
+  typedef CountingBloomFilter<S,T,U> parent;
+
 };
 
 
