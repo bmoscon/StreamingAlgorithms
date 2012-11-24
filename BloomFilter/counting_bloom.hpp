@@ -65,6 +65,10 @@ public:
   CountingBloomFilter(const std::vector<hash_function> &hash_list) : 
     bloom_array_(std::numeric_limits<S>::max(), false), 
     hash_list_(hash_list) {}
+
+  CountingBloomFilter(const CountingBloomFilter<S,T,U> &s) :
+    bloom_array_(s.bloom_array_),
+    hash_list_(s.hash_list_) {}
         
   virtual void add(const T &s) {
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {

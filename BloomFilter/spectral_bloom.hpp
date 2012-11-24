@@ -64,6 +64,9 @@ public:
     
   SpectralBloomFilter(const std::vector<hash_function> &hash_list) : 
     CountingBloomFilter<S,T,U>(hash_list) {}
+
+  SpectralBloomFilter(const CountingBloomFilter<S,T,U> &s) : 
+    CountingBloomFilter<S,T,U>(s) {}
         
   
   U occurrences(const T &s) const {
