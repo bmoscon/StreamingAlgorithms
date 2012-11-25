@@ -54,86 +54,108 @@
 #include <cmath>
 #include <cassert>
 
-uint64_t mask_table[] = {0x1,    0x3,    0x7,    0xF,   
-                         0x1F,   0x3F,   0x7F,   0xFF, 
-	                 0x1FF,  0x3FF,  0x7FF,  0xFFF, 
-                         0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
+static uint64_t mask_table[] = {0x1,    0x3,    0x7,    0xF,   
+				0x1F,   0x3F,   0x7F,   0xFF, 
+				0x1FF,  0x3FF,  0x7FF,  0xFFF, 
+				0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
 
+template <class T = uint64_t>
 class BloomArray {
 
 public:
 
-  BloomArray(const uint64_t &elements, const uint64_t &bits_per_element = 1) :
-    array_(ceil(elements * bits_per_element / 64.0), 0),
+  BloomArray(const T &elements, const T &bits_per_element = 1) :
+    array_(ceil(elements * bits_per_element / (sizeof(T) * 8.0)), 0),
     elem_bits_(bits_per_element),
     elem_mask_(mask_table[bits_per_element-1]) { 
     
     assert(bits_per_element < 17 && bits_per_element); 
   }
 
-  uint64_t at(const uint64_t &index) const {
+  T at(const T &index) const {
 
-    uint64_t idx = index_translate(index);
-    uint64_t mask = elem_mask_ << (64 - idx);
+    T idx = index_translate(index);
+    T mask = elem_mask_ << (bitcount() - idx);
 
     return (lookup(idx, mask));
   }
 
-  void inc(const uint64_t &index) {
-    uint64_t idx = index_translate(index);
-    uint64_t mask = elem_mask_;
+  void inc(const T &index) {
+    T idx = index_translate(index);
+    T mask = elem_mask_;
     
-    mask <<= (64 - idx);
+    mask <<= (bitcount() - idx);
 
-    uint64_t value = lookup(idx, mask);
+    T value = lookup(idx, mask);
     
     if (value == elem_mask_) {
       return;
     } else {
-      array_[idx >> 6] &= ~mask;
+      array_[idx >> (log2(bitcount()))] &= ~mask;
       
       ++value;
-      value <<= (64 - idx);
+      value <<= (bitcount() - idx);
 
-      array_[idx >> 6] |= value;
+      array_[idx >> (log2(bitcount()))] |= value;
     }
   }
 
-  void dec(const uint64_t &index) {
-    uint64_t idx = index_translate(index);
-    uint64_t mask = elem_mask_;
+  void dec(const T &index) {
+    T idx = index_translate(index);
+    T mask = elem_mask_;
     
-    mask <<= (64 - idx);
+    mask <<= (bitcount() - idx);
 
-    uint64_t value = lookup(idx, mask);
+    T value = lookup(idx, mask);
 
     if (value == 0) {
       return;
     } else {
-      array_[idx >> 6] &= ~mask;
+      array_[idx >> (log2(bitcount()))] &= ~mask;
 
       --value;
-      value <<= (64 - idx);
+      value <<= ((sizeof(T) << 3) - idx);
 
-      array_[idx >> 6] |= value;
+      array_[idx >> (log2(bitcount()))] |= value;
+    }
+  }
+
+  void dump() {
+    for (int i = 0; i < array_.size(); ++i) {
+      std::cout << array_[i] << std::endl;
     }
   }
 
 
 protected:
 
-  inline uint64_t index_translate(const uint64_t &index) const {
+  inline T index_translate(const T &index) const {
     return ((index + 1) * elem_bits_);
   }
 
-  inline uint64_t lookup(const uint64_t &index, uint64_t &mask) const {
-    return ((array_[index >> 6] & mask) >> (64 - index));
+  inline T lookup(const T &index, T &mask) const {
+    return ((array_[index >> log2(bitcount())] & mask) >> ((sizeof(T) << 3) - index));
+  }
+
+  inline T bitcount() const {
+    return (sizeof(T) << 3);
+  }
+
+  inline uint32_t log2(const uint32_t x) {
+    uint32_t ret;
+    
+    asm ( "\tbsr %1, %0\n"
+	  : "=r" (ret)
+	  : "r"  (x)
+        );
+    
+    return (ret);
   }
   
   
-  std::vector<uint64_t> array_;
-  uint64_t elem_bits_;
-  uint64_t elem_mask_;
+  std::vector<T> array_;
+  T elem_bits_;
+  T elem_mask_;
 };
 
 
