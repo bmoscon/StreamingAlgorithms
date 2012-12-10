@@ -3,3 +3,5 @@ A Set of Filters, written in C++. Types include:
  Bloom Filter
  Counting Bloom Filter
  Spectral Bloom Filter
+
+ Count-Min Sketch
