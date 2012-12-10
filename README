@@ -1,4 +1,4 @@
-A Set of Filters, written in C++. Types include:
+A Set of Streaming Algorithms, written in C++. Types include:
 
  Bloom Filter
  Counting Bloom Filter
