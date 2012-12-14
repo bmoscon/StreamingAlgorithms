@@ -1,8 +1,0 @@
-#ifndef __CHECKSUM___
-#define __CHECKSUM__
-
-
-uint16_t checksum_16(const std::string &s);
-uint32_t checksum_32(const std::string &s);
-
-#endif
