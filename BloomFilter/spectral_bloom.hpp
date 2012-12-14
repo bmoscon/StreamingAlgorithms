@@ -49,43 +49,42 @@
 #ifndef __SPECTRAL_BLOOM_FILTER__
 #define __SPECTRAL_BLOOM_FILTER__
 
-#include <vector>
 #include <limits>
 #include <stdint.h>
 
-
 #include "counting_bloom.hpp"
 
-template <class S, class T, class U>
-class SpectralBloomFilter : public CountingBloomFilter<S, T, U> {
+
+template <class S, class T>
+class SpectralBloomFilter : public CountingBloomFilter<S, T> {
 public:
   typedef S (*hash_function)(const T &s);
     
     
-  SpectralBloomFilter(const std::vector<hash_function> &hash_list) : 
-    CountingBloomFilter<S,T,U>(hash_list) {}
+  SpectralBloomFilter(const std::vector<hash_function> &hash_list, uint32_t bits) : 
+    CountingBloomFilter<S,T>(hash_list, bits) {}
 
-  SpectralBloomFilter(const CountingBloomFilter<S,T,U> &s) : 
-    CountingBloomFilter<S,T,U>(s) {}
+  SpectralBloomFilter(const CountingBloomFilter<S,T> &s) : 
+    CountingBloomFilter<S,T>(s) {}
         
   
-  U occurrences(const T &s) const {
+  uint64_t occurrences(const T &s) const {
     
     uint64_t return_val = std::numeric_limits<uint64_t>::max();
     uint64_t compare_val;
     
     for (uint32_t i = 0; i < parent::hash_list_.size(); ++i) {
-      compare_val = parent::bloom_array_[(*parent::hash_list_[i])(s)];
+      compare_val = parent::bloom_array_.at((*parent::hash_list_[i])(s));
       if (compare_val < return_val) {
 	return_val = compare_val;
       }
     }
     
-    return ((U)return_val);
+    return (return_val);
   }
 
 private:
-  typedef CountingBloomFilter<S,T,U> parent;
+  typedef CountingBloomFilter<S,T> parent;
 
 };
 

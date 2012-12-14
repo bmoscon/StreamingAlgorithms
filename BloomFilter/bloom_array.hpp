@@ -141,7 +141,7 @@ protected:
     return (sizeof(T) << 3);
   }
 
-  inline uint32_t log2(const uint32_t x) {
+  inline uint32_t log2(const uint32_t x) const {
     uint32_t ret;
     
     asm ( "\tbsr %1, %0\n"

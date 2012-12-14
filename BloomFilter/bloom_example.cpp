@@ -1,8 +1,8 @@
 /*
- * counting_bloom.hpp
+ * bloom_example.cpp
  *
  *
- * Counting Bloom Filter Implementation
+ * Bloom Filter - Example Usage
  *
  *
  * Copyright (C) 2012  Bryant Moscon - bmoscon@gmail.com
@@ -45,59 +45,75 @@
  * THE SOFTWARE.
  *
  */
+ 
 
-#ifndef __COUNTING_BLOOM_FILTER__
-#define __COUNTING_BLOOM_FILTER__
+#include <iostream>
+#include <cstring>
 
-#include <limits>
-#include <stdint.h>
+#include "bloom.hpp"
+#include "counting_bloom.hpp"
+#include "spectral_bloom.hpp"
+#include "../hash/MurmurHash3.hpp"
 
-#include "bloom_.hpp"
-#include "bloom_array.hpp"
 
+uint16_t hash(const std::string &s) {
+  uint32_t ret;
+  uint16_t rc;
+  MurmurHash3_x86_32(s.c_str(), s.length(), 5, &ret);
 
-template <class S, class T>
-class CountingBloomFilter : Bloom<S, T> {
-public:
-  typedef S (*hash_function)(const T &s);
-    
-    
-  CountingBloomFilter(const std::vector<hash_function> &hash_list, uint32_t bits) : 
-    bloom_array_(std::numeric_limits<S>::max(), bits), 
-    hash_list_(hash_list) {}
+  memcpy(&rc, &ret, sizeof(uint16_t));
 
-  CountingBloomFilter(const CountingBloomFilter<S,T> &s) :
-    bloom_array_(s.bloom_array_),
-    hash_list_(s.hash_list_) {}
-        
-  virtual void add(const T &s) {
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      bloom_array_.inc((*hash_list_[i])(s));
-    }
-  }
+  return rc;
+}
 
-  virtual void remove(const T &s) {
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      bloom_array_.dec((*hash_list_[i])(s));
-    }
-  }
-
-    
-  virtual bool exists(const T &s) const {
-    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
-      if (!bloom_array_.at((*hash_list_[i])(s))) {
-	return (false);
-      }
-    }
-    
-    return (true);
-  }
-    
-protected:
+int main () {
   
-  BloomArray<> bloom_array_;
-  std::vector<hash_function> hash_list_;
-};
+  std::vector<BloomFilter<uint16_t, std::string>::hash_function> list(1);
+  std::vector<CountingBloomFilter<uint16_t, std::string>::hash_function> list2(1);
+  
+  list[0] = hash;
+  list2[0] = hash;
+  
+  BloomFilter<uint16_t, std::string>  a(list);
+  std::string b = "abc";
+  
+  std::cout << "Testing Empty Bloom Filter for string \"" << b << "\"\n"; 
+  std::cout << a.exists(b) << std::endl << std::endl;
+
+  
+  std::cout << "Adding string \"" << b << "\" to Bloom Filter and testing for existence\n"; 
+  a.add(b);
+
+  std::cout << a.exists(b) << std::endl << std::endl;
+  
+  
+
+  CountingBloomFilter<uint16_t, std::string> count_b(list2, 4);
+  
+  count_b.add(b);
+  count_b.add(b);
+  count_b.remove(b);
+  std::cout << "Adding string \"" << b << "\" to Counting Bloom Filter twice, and removing "
+	    << "once, then testing for existence\n"; 
+  std::cout << count_b.exists(b) << std::endl << std::endl;
 
 
-#endif
+  std::cout << "Adding string \"" << b << "\" to Spectral Bloom Filter three times and "
+	    << "removing once, then getting occurrences\n"; 
+  SpectralBloomFilter<uint16_t, std::string> spectral_b(list2, 4);
+
+  spectral_b.add(b);
+  spectral_b.add(b);
+  spectral_b.add(b);
+  spectral_b.remove(b);
+  
+  std::cout << spectral_b.occurrences(b) << std::endl << std::endl;
+
+  SpectralBloomFilter<uint16_t, std::string> spectral_b2(count_b);
+  std::cout << "Copying previous Counting Bloom Filter into new Spectral Bloom Filter and "
+	    << "testing existence\n"; 
+
+  std::cout << spectral_b2.exists(b) << std::endl << std::endl;
+  
+  return 0;
+}
