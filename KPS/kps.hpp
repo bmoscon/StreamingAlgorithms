@@ -8,7 +8,7 @@
  *   by Karp, Papadimitriou, and Shenker
  *
  *
- * Copyright (C) 2012  Bryant Moscon - bmoscon@gmail.com
+ * Copyright (C) 2013  Bryant Moscon - bmoscon@gmail.com
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to 
