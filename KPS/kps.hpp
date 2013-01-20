@@ -53,7 +53,6 @@
 
 #include <vector>
 #include <tr1/unordered_map>
-#include <vector>
 #include <stdint.h>
 
 template <class S>
