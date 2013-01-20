@@ -5,3 +5,5 @@ A Set of Streaming Algorithms, written in C++. Types include:
  Spectral Bloom Filter
 
  Count-Min Sketch
+
+ Karp-Papadimitriou-Shenker algorithm
