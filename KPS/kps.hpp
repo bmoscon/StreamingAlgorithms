@@ -82,7 +82,7 @@ public:
     }
   }
 
-  void add(std::vector<S> &x)
+  void add(const std::vector<S> &x)
   {
     for (int i = 0; i < x.size(); ++i) {
       add(x[i]);
