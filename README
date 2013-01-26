@@ -6,4 +6,6 @@ A Set of Streaming Algorithms, written in C++. Types include:
 
  Count-Min Sketch
 
- Karp-Papadimitriou-Shenker algorithm
+ Karp-Papadimitriou-Shenker
+
+ Misra-Gries
