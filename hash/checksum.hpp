@@ -47,7 +47,7 @@
  *
  */
 
-#ifndef __CHECKSUM___
+#ifndef __CHECKSUM__
 #define __CHECKSUM__
 
 
