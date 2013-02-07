@@ -49,6 +49,41 @@
 #ifndef __COUNT_MIN_SKETCH__
 #define __COUNT_MIN_SKETCH__
 
+#include <vector>
+#include <limits>
+#include <stdint.h>
+
+template <class S, class T>
+class CountMinSketch {
+public:
+  typedef S (*hash_function)(const T &s);
+    
+    
+  CountMinSketch(const std::vector<hash_function> &hash_list) : 
+    matrix_(hash_list.size(), std::vector<S>(std::numeric_limits<S>::max(), 0)), 
+    hash_list_(hash_list) {}
+        
+  void add(const T &s) {
+    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
+      ++matrix_[i][(*hash_list_[i])(s)];
+    }
+  }
+    
+  bool exists(const T &s) const {
+    for (uint32_t i = 0; i < hash_list_.size(); ++i) {
+      if (!matrix_[i][(*hash_list_[i])(s)]) {
+	return (false);
+      }
+    }
+    
+    return (true);
+  }
+    
+private:
+  
+  std::vector<std::vector<S> > matrix_;
+  std::vector<hash_function> hash_list_;
+};
 
 
 
