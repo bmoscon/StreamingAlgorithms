@@ -116,7 +116,7 @@ template <class T>
 class StreamSummary
 {
 public:
-  StreamSummary(const uint64_t &size) : max_size(size), size(0) {}
+  StreamSummary(const uint64_t &size) : max_size(size) {}
 
   void add(const T &obj)
   {
@@ -126,7 +126,8 @@ public:
 
     if (ret.second) {
       increment(obj, ret.first);
-    } else if (size < max_size) {
+    } else if (bucket_map.size() < max_size) {
+      std::cout << "calling insert\n";
       insert(obj);
     } else {
       replace_and_insert(obj);
@@ -182,6 +183,7 @@ private:
     if (value_it != value_map.end()) {
       // bucket exists, insert object
       value_it->second->insert(obj);
+      bucket_map.insert(std::make_pair(obj, value_it->second));
     } else {
       // does not exits, create new bucket
       bm_ret ret;
@@ -190,7 +192,6 @@ private:
       value_map.insert(std::make_pair(val + 1, ret.first->second));
       ret.first->second->insert(obj);
     }
-
   }
   
   void insert(const T &obj)
@@ -210,8 +211,6 @@ private:
       value_it->second->insert(obj);
       bucket_map.insert(std::make_pair(obj, value_it->second));
     }
-    
-    ++size;
   }
   
   void replace_and_insert(const T &obj)
@@ -250,10 +249,8 @@ private:
   
   
   uint64_t max_size;
-  uint64_t size;
   std::tr1::unordered_map<T, Bucket<T> *> bucket_map;
   std::map<uint64_t, Bucket<T> *> value_map;
-  
 };
 
 
