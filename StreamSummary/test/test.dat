@@ -1,3 +1,17 @@
+# Simple test data
+#
+# run like so:
+# ss_test <size> <file>
+#
+# output is in the format:
+# <bucket_value>
+# <bucket_member> <bucket_member> ...
+#
+# <bucket_value>
+# <bucket_member> ...
+# ...
+# etc
+
 abc
 def
 a

@@ -92,8 +92,15 @@ int main(int argc, char* argv[])
 
  
   while (std::getline(stream, line)) {
-    a.add(line);
+    if (!line.size()) {
+      // blank lines (i.e. lines with only a carriage return) will have line with len 0
+      continue;
+    }
+    if (line[0] != '#') {
+      a.add(line);
+    }
   }
+  std::cout << std::endl;
 
   a.print();
   
