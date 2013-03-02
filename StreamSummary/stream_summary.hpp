@@ -164,10 +164,11 @@ private:
     // regardless of what path we take below, we need to remove the old entry 
     // from the original bucket
     b->remove(obj);
+    // and remove the entry from that T to the bucket, since it is going to a new bucket
+    bucket_map.erase(it);
     // if bucket is now empty, we can remove it
     if (b->getSize() == 0) {
       value_map.erase(val);
-      bucket_map.erase(it);
       delete b;
     }
     
