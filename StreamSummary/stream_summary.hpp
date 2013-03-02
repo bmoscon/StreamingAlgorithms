@@ -168,8 +168,6 @@ private:
     // regardless of what path we take below, we need to remove the old entry 
     // from the original bucket
     b->remove(obj);
-    // and remove the entry from that T to the bucket, since it is going to a new bucket
-    bucket_map.erase(it);
     // if bucket is now empty, we can remove it
     if (b->getSize() == 0) {
       value_map.erase(val);
@@ -182,14 +180,12 @@ private:
     if (value_it != value_map.end()) {
       // bucket exists, insert object
       value_it->second->insert(obj);
-      bucket_map.insert(std::make_pair(obj, value_it->second));
+      it->second = value_it->second;
     } else {
       // does not exits, create new bucket
-      bm_ret ret;
-      ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(val+1)));
-      assert(ret.second);
-      value_map.insert(std::make_pair(val + 1, ret.first->second));
-      ret.first->second->insert(obj);
+      it->second = new Bucket<T>(val+1);
+      value_map.insert(std::make_pair(val + 1, it->second));
+      it->second->insert(obj);
     }
   }
   
