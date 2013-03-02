@@ -69,12 +69,16 @@ public:
 
   void remove(const T &obj)
   {
+    bool found = false;
+    
     for (uint64_t i = 0; i < list.size(); ++i) {
       if (list[i] == obj) {
 	list.erase(list.begin()+i);
+	found = true;
 	break;
       }
     }
+    assert(found);
   }
 
   uint64_t getValue() const
