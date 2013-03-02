@@ -127,7 +127,6 @@ public:
     if (ret.second) {
       increment(obj, ret.first);
     } else if (bucket_map.size() < max_size) {
-      std::cout << "calling insert\n";
       insert(obj);
     } else {
       replace_and_insert(obj);
