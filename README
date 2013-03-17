@@ -10,6 +10,4 @@ A Set of Streaming Algorithms, written in C++. Types include:
 
  Misra-Gries
 
- Space Saving
-
- Stream Summary
+ Space Saving/Stream Summary
