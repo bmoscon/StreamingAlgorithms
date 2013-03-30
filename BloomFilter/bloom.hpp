@@ -51,6 +51,7 @@
 
 #include <vector>
 #include <limits>
+#include <cassert>
 #include <stdint.h>
 
 
@@ -65,14 +66,27 @@ public:
   BloomFilter(const std::vector<hash_function> &hash_list) : 
     bloom_array_(std::numeric_limits<S>::max(), false), 
     hash_list_(hash_list) {}
+
+  BloomFilter() : bloom_array_(std::numeric_limits<S>::max(), false),
+		  hash_list_(std::vector<hash_function>(0)) {}
+
+  void setHash(const std::vector<hash_function> &hash_list) {
+    hash_list_(hash_list);
+  }
+
+  void addHash(const hash_function &hash) {
+    hash_list_.push_back(hash);
+  }
         
   virtual void add(const T &s) {
+    assert(hash_list_.size());
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {
       bloom_array_[(*hash_list_[i])(s)] = true;
     }
   }
     
   virtual bool exists(const T &s) const {
+    assert(hash_list_.size());
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {
       if (!bloom_array_[(*hash_list_[i])(s)]) {
 	return (false);
