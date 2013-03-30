@@ -64,21 +64,17 @@ public:
   
   void insert(const T &obj)
   {
+    uint32_t index = list.size();
     list.push_back(obj);
+    obj_map.insert(std::make_pair(obj, index));
   }
 
   void remove(const T &obj)
   {
-    bool found = false;
-    
-    for (uint64_t i = 0; i < list.size(); ++i) {
-      if (list[i] == obj) {
-	list.erase(list.begin()+i);
-	found = true;
-	break;
-      }
-    }
-    assert(found);
+    typename std::tr1::unordered_map<T, uint32_t>::iterator it = obj_map.find(obj);
+    assert(it != obj_map.end());
+    list.erase(list.begin() + it->second);
+    obj_map.erase(it);
   }
 
   uint64_t getValue() const
@@ -109,6 +105,7 @@ public:
 private:
   uint64_t value;
   std::vector<T> list;
+  std::tr1::unordered_map<T, uint32_t> obj_map;
 };
 
 

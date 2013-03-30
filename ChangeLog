@@ -1,0 +1,11 @@
+March 30, 2013:
+	StreamSummary
+	Added unordered_map to Bucket class to avoid O(n) search for object to remove from bucket.
+	This uses more memory, but its probably an ok tradeoff for speed.
+
+	BloomFilter
+	Added two new methods and a new constuctor. No longer necessary to pass a vector
+	of function pointers to constructor; use setHash to pass a fp vector, or use
+	addHash to add individual fps to the list
+
+ChangeLog started March 30, 2013
