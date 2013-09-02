@@ -1,3 +1,7 @@
+September 2, 2013:
+	* Fixed bug in bucket logic that was causing an assert
+	* Checking return value of all insertions now
+
 March 30, 2013:
 	StreamSummary
 	Added unordered_map to Bucket class to avoid O(n) search for object to remove from bucket.

@@ -64,9 +64,12 @@ public:
   
   void insert(const T &obj)
   {
+    std::pair<typename std::tr1::unordered_map<T, uint32_t>::iterator, bool> ret;
     uint32_t index = list.size();
+    
     list.push_back(obj);
-    obj_map.insert(std::make_pair(obj, index));
+    ret = obj_map.insert(std::make_pair(obj, index));
+    assert(ret.second);
   }
 
   void remove(const T &obj)
@@ -74,6 +77,7 @@ public:
     typename std::tr1::unordered_map<T, uint32_t>::iterator it = obj_map.find(obj);
     assert(it != obj_map.end());
     list.erase(list.begin() + it->second);
+    update_obj_map(it->second);
     obj_map.erase(it);
   }
 
@@ -103,6 +107,18 @@ public:
   }
 
 private:
+
+  void update_obj_map(uint32_t position)
+  {
+    typename std::tr1::unordered_map<T, uint32_t>::iterator it;
+    
+    for (it = obj_map.begin(); it != obj_map.end(); ++it) {
+      if (it->second > position) {
+	--(it->second);
+      }
+    }
+  }
+
   uint64_t value;
   std::vector<T> list;
   std::tr1::unordered_map<T, uint32_t> obj_map;
@@ -144,6 +160,7 @@ private:
   typedef typename std::tr1::unordered_map<T, Bucket<T> *>::iterator bm_it;
   typedef typename std::map<uint64_t, Bucket<T> *>::iterator v_it;
   typedef std::pair<bm_it, bool> bm_ret;
+  typedef std::pair<v_it, bool> v_ret;
   
 
   bm_ret exists(const T &obj)
@@ -173,6 +190,7 @@ private:
     
     // check if bucket of val+1 exists
     v_it value_it = value_map.find(val + 1);
+    v_ret value_ret;
 
     if (value_it != value_map.end()) {
       // bucket exists, insert object
@@ -181,7 +199,8 @@ private:
     } else {
       // does not exits, create new bucket
       it->second = new Bucket<T>(val+1);
-      value_map.insert(std::make_pair(val + 1, it->second));
+      value_ret = value_map.insert(std::make_pair(val + 1, it->second));
+      assert(value_ret.second);
       it->second->insert(obj);
     }
   }
@@ -190,6 +209,7 @@ private:
   {
     bm_ret ret;
     v_it value_it;
+    v_ret value_ret;
 
     value_it = value_map.find(1);
 
@@ -197,11 +217,13 @@ private:
     if (value_it == value_map.end()) {
       ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(1)));
       assert(ret.second);
-      value_map.insert(std::make_pair(1, ret.first->second));
+      value_ret = value_map.insert(std::make_pair(1, ret.first->second));
+      assert(value_ret.second);
       ret.first->second->insert(obj);
     } else {
       value_it->second->insert(obj);
-      bucket_map.insert(std::make_pair(obj, value_it->second));
+      ret = bucket_map.insert(std::make_pair(obj, value_it->second));
+      assert(ret.second);
     }
   }
   
@@ -223,18 +245,21 @@ private:
 
     // check if bucket of val+1 exists
     v_it value_it;
+    bm_ret ret;
+    v_ret value_ret;
     value_it = value_map.find(val + 1);
     if (value_it != value_map.end()) {
       // bucket exists, insert object
       value_it->second->insert(obj);
       // insert obj into map
-      bucket_map.insert(std::make_pair(obj, value_it->second));
+      ret = bucket_map.insert(std::make_pair(obj, value_it->second));
+      assert(ret.second);
     } else {
       // does not exits, create new bucket
-      bm_ret ret;
       ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(val+1)));
       assert(ret.second);
-      value_map.insert(std::make_pair(val + 1, ret.first->second));
+      value_ret = value_map.insert(std::make_pair(val + 1, ret.first->second));
+      assert(value_ret.second);
       ret.first->second->insert(obj);
     }
   }
