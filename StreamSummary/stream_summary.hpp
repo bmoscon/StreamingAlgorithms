@@ -131,6 +131,19 @@ class StreamSummary
 public:
   StreamSummary(const uint64_t &size) : max_size(size) {}
 
+  ~StreamSummary()
+  {
+    v_it vit;
+    Bucket<T> *b;
+
+    for (vit = value_map.begin(); vit != value_map.end(); ++vit) {
+      b = vit->second;
+      value_map.erase(vit);
+      delete b;
+    }
+
+  }
+
   void add(const T &obj)
   {
     bm_ret ret;
