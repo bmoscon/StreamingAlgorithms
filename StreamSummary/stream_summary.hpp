@@ -56,6 +56,7 @@
 #include <cassert>
 #include <unordered_map>
 #include <map>
+#include <set>
 
 template <class T>
 class Bucket {
@@ -64,21 +65,17 @@ public:
   
   void insert(const T &obj)
   {
-    std::pair<typename std::unordered_map<T, uint32_t>::iterator, bool> ret;
-    uint32_t index = list.size();
-    
-    list.push_back(obj);
-    ret = obj_map.insert(std::make_pair(obj, index));
+    std::pair<typename std::set<T>::iterator, bool> ret;
+
+    ret = list.insert(obj);
     assert(ret.second);
   }
 
   void remove(const T &obj)
   {
-    typename std::unordered_map<T, uint32_t>::iterator it = obj_map.find(obj);
-    assert(it != obj_map.end());
-    list.erase(list.begin() + it->second);
-    update_obj_map(it->second);
-    obj_map.erase(it);
+    typename std::set<T>::iterator it = list.find(obj);
+    assert(it != list.end());
+    list.erase(it);
   }
 
   uint64_t getValue() const
@@ -94,34 +91,24 @@ public:
   T getMin() const
   {
     assert(list.size() > 0);
-    return (list[0]);
+    return (*list.begin());
   }
 
   void print() const 
   {
     std::cout << value << std::endl;
-    for (uint64_t i = 0; i < list.size(); ++i) {
-      std::cout << list[i] << " ";
+
+    typename std::set<T>::iterator it;
+    for (it = list.begin(); it != list.end(); ++it) {
+      std::cout << *it << " ";
     }
     std::cout << std::endl << std::endl;;
   }
 
 private:
 
-  void update_obj_map(uint32_t position)
-  {
-    typename std::unordered_map<T, uint32_t>::iterator it;
-    
-    for (it = obj_map.begin(); it != obj_map.end(); ++it) {
-      if (it->second > position) {
-	--(it->second);
-      }
-    }
-  }
-
   uint64_t value;
-  std::vector<T> list;
-  std::unordered_map<T, uint32_t> obj_map;
+  std::set<T> list;
 };
 
 
