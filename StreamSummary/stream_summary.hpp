@@ -54,7 +54,7 @@
 #include <stdint.h>
 #include <vector>
 #include <cassert>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <map>
 
 template <class T>
@@ -64,7 +64,7 @@ public:
   
   void insert(const T &obj)
   {
-    std::pair<typename std::tr1::unordered_map<T, uint32_t>::iterator, bool> ret;
+    std::pair<typename std::unordered_map<T, uint32_t>::iterator, bool> ret;
     uint32_t index = list.size();
     
     list.push_back(obj);
@@ -74,7 +74,7 @@ public:
 
   void remove(const T &obj)
   {
-    typename std::tr1::unordered_map<T, uint32_t>::iterator it = obj_map.find(obj);
+    typename std::unordered_map<T, uint32_t>::iterator it = obj_map.find(obj);
     assert(it != obj_map.end());
     list.erase(list.begin() + it->second);
     update_obj_map(it->second);
@@ -110,7 +110,7 @@ private:
 
   void update_obj_map(uint32_t position)
   {
-    typename std::tr1::unordered_map<T, uint32_t>::iterator it;
+    typename std::unordered_map<T, uint32_t>::iterator it;
     
     for (it = obj_map.begin(); it != obj_map.end(); ++it) {
       if (it->second > position) {
@@ -121,7 +121,7 @@ private:
 
   uint64_t value;
   std::vector<T> list;
-  std::tr1::unordered_map<T, uint32_t> obj_map;
+  std::unordered_map<T, uint32_t> obj_map;
 };
 
 
@@ -170,7 +170,7 @@ public:
 
 
 private:
-  typedef typename std::tr1::unordered_map<T, Bucket<T> *>::iterator bm_it;
+  typedef typename std::unordered_map<T, Bucket<T> *>::iterator bm_it;
   typedef typename std::map<uint64_t, Bucket<T> *>::iterator v_it;
   typedef std::pair<bm_it, bool> bm_ret;
   typedef std::pair<v_it, bool> v_ret;
@@ -279,7 +279,7 @@ private:
   
   
   uint64_t max_size;
-  std::tr1::unordered_map<T, Bucket<T> *> bucket_map;
+  std::unordered_map<T, Bucket<T> *> bucket_map;
   std::map<uint64_t, Bucket<T> *> value_map;
 };
 
