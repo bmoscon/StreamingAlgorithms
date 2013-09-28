@@ -52,7 +52,7 @@
 #define __KPS__
 
 #include <vector>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <stdint.h>
 
 template <class S>
@@ -64,9 +64,9 @@ public:
   void add(const S &x) 
   {
     // insert or incrent phase
-    typename std::tr1::unordered_map<S, uint64_t>::iterator map_it = k_.find(x);
+    typename std::unordered_map<S, uint64_t>::iterator map_it = k_.find(x);
     if (map_it == k_.end()) {
-      k_.insert(std::make_pair<S, uint64_t>(x, 1));
+      k_.insert(std::make_pair(x, 1));
     } else {
       ++(map_it->second);
     }
@@ -97,7 +97,7 @@ public:
   //returning a vector ok thanks to copy elision/return value optimization
   std::vector<S> report() const 
   {
-    typename std::tr1::unordered_map<S, uint64_t>::const_iterator it;
+    typename std::unordered_map<S, uint64_t>::const_iterator it;
     std::vector<S> ret;
     ret.reserve(k_.size());
     
@@ -109,7 +109,7 @@ public:
   }
     
 private:
-  std::tr1::unordered_map<S, uint64_t> k_;
+  std::unordered_map<S, uint64_t> k_;
   double theta_;
 };
 
