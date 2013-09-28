@@ -1,4 +1,4 @@
-A Set of Streaming Algorithms, written in C++. Types include:
+A Set of Streaming Algorithms. Types include:
 
  Bloom Filter
  Counting Bloom Filter
@@ -11,3 +11,7 @@ A Set of Streaming Algorithms, written in C++. Types include:
  Misra-Gries
 
  Space Saving/Stream Summary
+
+
+
+Currently most are in C++ (one is in python) and plans in to port all to Python, Ruby, Java and Scala

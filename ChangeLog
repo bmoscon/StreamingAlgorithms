@@ -1,3 +1,7 @@
+September 28, 2013:
+	* fixed various bugs in StreamSummary, added destructor, etc
+	* ported stream summary to python
+
 September 2, 2013:
 	* Fixed bug in bucket logic that was causing an assert
 	* Checking return value of all insertions now
