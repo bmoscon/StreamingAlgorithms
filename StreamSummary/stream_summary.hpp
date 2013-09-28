@@ -56,50 +56,56 @@
 #include <cassert>
 #include <unordered_map>
 #include <map>
-#include <set>
+#include <list>
 
 template <class T>
 class Bucket {
 public:
-  Bucket(const uint64_t &v = 1) : value(v) {}
+  Bucket(const uint64_t &v = 1) : value_(v) {}
   
   void insert(const T &obj)
   {
-    std::pair<typename std::set<T>::iterator, bool> ret;
-
-    ret = list.insert(obj);
-    assert(ret.second);
+    list_.push_back(obj);
   }
 
   void remove(const T &obj)
   {
-    typename std::set<T>::iterator it = list.find(obj);
-    assert(it != list.end());
-    list.erase(it);
+    typename std::list<T>::iterator it;
+    
+    for (it = list_.begin(); it != list_.end(); ++it) {
+      if (*it == obj) {
+	list_.erase(it);
+	return;
+      }
+    }
+    
+    // we should only arrive here if obj is not in the list, which should never happen
+    // so throw an error
+    assert(false);
   }
 
   uint64_t getValue() const
   {
-    return (value);
+    return (value_);
   }
 
   size_t getSize() const
   {
-    return (list.size());
+    return (list_.size());
   }
 
   T getMin() const
   {
-    assert(list.size() > 0);
-    return (*list.begin());
+    assert(list_.size() > 0);
+    return (list_.front());
   }
 
   void print() const 
   {
-    std::cout << value << std::endl;
+    std::cout << value_ << std::endl;
 
-    typename std::set<T>::iterator it;
-    for (it = list.begin(); it != list.end(); ++it) {
+    typename std::list<T>::const_iterator it;
+    for (it = list_.begin(); it != list_.end(); ++it) {
       std::cout << *it << " ";
     }
     std::cout << std::endl << std::endl;;
@@ -107,8 +113,8 @@ public:
 
 private:
 
-  uint64_t value;
-  std::set<T> list;
+  uint64_t value_;
+  std::list<T> list_;
 };
 
 
