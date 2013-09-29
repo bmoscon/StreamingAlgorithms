@@ -63,7 +63,7 @@ public:
         
   void add(const S &x) 
   {
-    // insert or incrent phase
+    // insert or increment phase
     typename std::unordered_map<S, uint64_t>::iterator map_it = k_.find(x);
     if (map_it == k_.end()) {
       k_.insert(std::make_pair(x, 1));
