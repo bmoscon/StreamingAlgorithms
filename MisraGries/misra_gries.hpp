@@ -59,39 +59,39 @@
 template <class T>
 class MG {
 public:
-    
-    MG() {}
-    
-    void add(const T &obj) 
-    {
-      if (item_ == obj) {
-        ++counter_;      
-      } else if (counter_ > 0) {
-        --counter_;
-      } else {
-        item_ = obj;
-        counter_ = 1;  
-      }
+  
+  MG() : counter_(0) {}
+  
+  void add(const T &obj) 
+  {
+    if (item_ == obj) {
+      ++counter_;      
+    } else if (counter_ > 0) {
+      --counter_;
+    } else {
+      item_ = obj;
+      counter_ = 1;  
     }
-    
-    void add(const std::vector<T> &vec)
-    {
-        for (int i = 0; i < vec.size(); ++i) {
-            add(vec[i]);
-        }
+  }
+  
+  void add(const std::vector<T> &vec)
+  {
+    for (int i = 0; i < vec.size(); ++i) {
+      add(vec[i]);
     }
-    
-    
-    std::pair<T, uint64_t> getMajorityItem() const
-    {
-      return (std::make_pair<T, uint64_t>(item_, counter_));
-    }
-
-       
+  }
+  
+  
+  std::pair<T, uint64_t> getMajorityItem() const
+  {
+    return (std::make_pair(item_, counter_));
+  }
+  
+  
 private:
   T item_;
   uint64_t counter_;
-    
+  
 };
 
 
