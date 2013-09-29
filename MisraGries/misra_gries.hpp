@@ -52,7 +52,10 @@
 #ifndef __MISRA_GRIES__
 #define __MISRA_GRIES__
 
+#include <iostream>
 #include <vector>
+#include <unordered_map>
+#include <cassert>
 #include <stdint.h>
 
 
@@ -60,17 +63,39 @@ template <class T>
 class MG {
 public:
   
-  MG() : counter_(0) {}
+  MG(uint64_t size) : k_(size) {}
   
   void add(const T &obj) 
   {
-    if (item_ == obj) {
-      ++counter_;      
-    } else if (counter_ > 0) {
-      --counter_;
+    typename std::unordered_map<T, uint64_t>::iterator it;
+    it = table_.find(obj);
+
+    if (it != table_.end()) {
+      // item exists, increment its counter
+
+      ++(it->second);
+    } else if (table_.size() < k_) {
+      // item doesnt exist, but we are below k threshold
+      // so add a new element to the table
+
+      std::pair<typename std::unordered_map<T, uint64_t>::iterator, bool> ret;
+      
+      ret = table_.insert(std::make_pair(obj, 1));
+      assert(ret.second);
     } else {
-      item_ = obj;
-      counter_ = 1;  
+      // no room, decremement all counters
+
+      it = table_.begin(); 
+      
+      while (it != table_.end()) {
+	--(it->second);
+	
+	if (it->second == 0) {
+	  it = table_.erase(it);
+	} else {
+	  ++it;
+	}
+      }
     }
   }
   
@@ -84,13 +109,37 @@ public:
   
   std::pair<T, uint64_t> getMajorityItem() const
   {
-    return (std::make_pair(item_, counter_));
+    typename std::unordered_map<T, uint64_t>::const_iterator it;
+    std::pair<T, uint64_t> ret;
+    
+    ret.first = T();
+    ret.second = 0;
+    
+    for (it = table_.begin(); it != table_.end(); ++it) {
+      if (it->second > ret.second) {
+	ret.first = it->first;
+	ret.second = it->second;
+      }
+    }
+    
+    return (ret);
+  }
+
+
+  void print() const
+  {
+    typename std::unordered_map<T, uint64_t>::const_iterator it;
+    
+    for (it = table_.begin(); it != table_.end(); ++it) {
+      std::cout << it->first << ":" << it->second << ", ";
+    }
+    std::cout << std::endl;
   }
   
   
 private:
-  T item_;
-  uint64_t counter_;
+  std::unordered_map<T, uint64_t> table_;
+  uint64_t k_;
   
 };
 

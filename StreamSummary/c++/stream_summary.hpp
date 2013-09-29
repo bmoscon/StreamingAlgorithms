@@ -129,12 +129,12 @@ public:
     v_it vit;
     Bucket<T> *b;
 
-    for (vit = value_map.begin(); vit != value_map.end(); ++vit) {
+    vit = value_map.begin(); 
+    while (vit != value_map.end()) {
       b = vit->second;
-      value_map.erase(vit);
+      vit = value_map.erase(vit);
       delete b;
     }
-
   }
 
   void add(const T &obj)

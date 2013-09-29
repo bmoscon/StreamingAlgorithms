@@ -73,12 +73,16 @@ public:
 
     // delete phase
     if (k_.size() > theta_) {
-      for (map_it = k_.begin(); map_it != k_.end(); ++map_it) {
+      map_it = k_.begin(); 
+      
+      while(map_it != k_.end()) {
 	--(map_it->second);
 	if (map_it->second == 0) {
-	  k_.erase(map_it);
+	  map_it = k_.erase(map_it);
+	} else {
+	  ++map_it;
 	}
-      } 
+      }
     }
   }
 

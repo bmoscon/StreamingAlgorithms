@@ -54,21 +54,27 @@
 
 #include <iostream>
 
-#include "../misra_gries.hpp"
+#include "misra_gries.hpp"
 
 
 int main()
-{
-  MG<int> mg = MG<int>();
+{ 
+  MG<int> mg(2);
   
   mg.add(2);
   mg.add(1);
   mg.add(2);
+  mg.add(2);
+  mg.add(1);
+  mg.add(5);
+  mg.add(7);
+  mg.add(9);
+  mg.add(10);
+  mg.add(11);
+  mg.add(13);
+  
 
-  std::pair<int, uint64_t> ret;
-  ret = mg.getMajorityItem();
-    
-  std::cout << ret.first << std::endl;
+  mg.print();
     
     
   return (0);
