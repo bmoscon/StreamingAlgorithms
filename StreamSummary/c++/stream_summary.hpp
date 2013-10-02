@@ -126,15 +126,7 @@ public:
 
   ~StreamSummary()
   {
-    v_it vit;
-    Bucket<T> *b;
-
-    vit = value_map.begin(); 
-    while (vit != value_map.end()) {
-      b = vit->second;
-      vit = value_map.erase(vit);
-      delete b;
-    }
+    clear();
   }
 
   void add(const T &obj)
