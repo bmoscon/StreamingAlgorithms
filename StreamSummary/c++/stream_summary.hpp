@@ -152,6 +152,23 @@ public:
     }
   }
 
+
+  void clear ()
+  {
+    v_it vit;
+    Bucket<T> *b;
+    
+    vit = value_map.begin(); 
+    while (vit != value_map.end()) {
+      b = vit->second;
+      vit = value_map.erase(vit);
+      delete b;
+    }
+
+    bucket_map.clear();
+  }
+
+
   void print() const
   {
     typename std::map<uint64_t, Bucket<T> *>::const_iterator it;
