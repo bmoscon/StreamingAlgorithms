@@ -145,6 +145,32 @@ public:
   }
 
 
+  bool exists(const T &obj) const
+  {
+    typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
+
+    it = bucket_map.find(obj);
+
+    return (it != bucket_map.cend());
+  }
+
+
+  // thanks to copy elision/RVO the compiler will
+  // elide the copy, so no performance hit
+  // in returning a copy of the local variable
+  std::vector<T> elementList() const
+  {
+    std::vector<T> ret;
+     typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
+    
+    for (it = bucket_map.begin(); it != bucket_map.end(); ++it) {
+      ret.push_back(it->first);
+    }
+    
+    return (ret);
+  }
+
+
   void clear ()
   {
     v_it vit;
