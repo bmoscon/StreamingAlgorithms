@@ -40,12 +40,19 @@ Copyright (C) 2012-2014  Bryant Moscon - bmoscon@gmail.com
 
 """
 
+from bisect import bisect_left
+
+
 class Bucket(object):
     def __init__(self, v):
         self.val = v
         self.items = []
 
     def __lt__(self, other):
+        # need to check if other is an int (for bisect left) or
+        # another bucket object (for when it is sorted)
+        if type(other) is int:
+            return self.val < other
         return self.val < other.value()
 
     def __str__(self):
@@ -88,6 +95,13 @@ class StreamSummary(object):
             s += "\n"
         return s
 
+
+    def __find_bucket(self, value):
+        end = len(self.bucket_list)
+        index = bisect_left(self.bucket_list, value, 0, end)
+        return index if index != end and self.bucket_list[index].value() == value else None
+        
+
     def add(self, e):
         # first check to see if item already present
         if e in self.bucket_map:
@@ -99,19 +113,19 @@ class StreamSummary(object):
             # if old bucket is empty, we can remove it
             if b.size() == 0:
                 self.bucket_list.remove(b)
-            # find new bucket and insert there
-            for i in self.bucket_list:
-                if i.value() == v + 1:
-                    i.insert(e)
-                    self.bucket_map[e] = i
-                    return
-            # new bucket of value <old value + 1> doesnt exist
-            # so create it now
-            b = Bucket(v + 1)
-            b.insert(e)
-            self.bucket_map[e] = b
-            self.bucket_list.append(b)
-            self.bucket_list.sort()
+            # find new bucket and insert there using binary search
+            bucket_index = self.__find_bucket(v + 1)
+            if bucket_index is not None:
+                self.bucket_list[bucket_index].insert(e)
+                self.bucket_map[e] = self.bucket_list[bucket_index]
+            else:
+                # new bucket of value <old value + 1> doesnt exist
+                # so create it now
+                b = Bucket(v + 1)
+                b.insert(e)
+                self.bucket_map[e] = b
+                self.bucket_list.append(b)
+                self.bucket_list.sort()
         else:
             # value not present, so lets check if we can just add it
             if len(self.bucket_map.keys()) < self.size:
@@ -129,18 +143,19 @@ class StreamSummary(object):
                 ejected_val = self.bucket_list[0].value()
                 del self.bucket_map[ejected]
                 self.bucket_list[0].remove(ejected)
+                # if the bucket is empty now, we can remove it
                 if self.bucket_list[0].size() == 0:
                     del self.bucket_list[0]
-
-                for i in self.bucket_list:
-                    if i.value() == ejected_val + 1:
-                        i.insert(e)
-                        self.bucket_map[e] = i
-                        return
-
-                b = Bucket(ejected_val + 1)
-                b.insert(e)
-                self.bucket_list.append(b)
-                self.bucket_list.sort()
-                self.bucket_map[e] = b
+                
+                # look up new bucket
+                bucket_index = self.__find_bucket(ejected_val + 1)
+                if bucket_index is not None:
+                    self.bucket_list[bucket_index].insert(e)
+                    self.bucket_map[e] = self.bucket_list[bucket_index]
+                else:
+                    b = Bucket(ejected_val + 1)
+                    b.insert(e)
+                    self.bucket_list.append(b)
+                    self.bucket_list.sort()
+                    self.bucket_map[e] = b
 
