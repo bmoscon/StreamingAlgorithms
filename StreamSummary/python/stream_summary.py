@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2013  Bryant Moscon - bmoscon@gmail.com
+Copyright (C) 2012-2014  Bryant Moscon - bmoscon@gmail.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to 
@@ -77,7 +77,7 @@ class StreamSummary(object):
         self.bucket_map = {}
         # sorted list of buckets (in order by value)
         self.bucket_list = []
-
+        # first item added will go into bucket 1, so add it now
         self.bucket_list.append(Bucket(1))
 
         
@@ -89,27 +89,33 @@ class StreamSummary(object):
         return s
 
     def add(self, e):
+        # first check to see if item already present
         if e in self.bucket_map:
+            # if so, remove it from old bucket
             b = self.bucket_map[e]
             v = b.value()
             
             b.remove(e)
+            # if old bucket is empty, we can remove it
             if b.size() == 0:
                 self.bucket_list.remove(b)
-            
+            # find new bucket and insert there
             for i in self.bucket_list:
                 if i.value() == v + 1:
                     i.insert(e)
                     self.bucket_map[e] = i
                     return
-            
+            # new bucket of value <old value + 1> doesnt exist
+            # so create it now
             b = Bucket(v + 1)
             b.insert(e)
             self.bucket_map[e] = b
             self.bucket_list.append(b)
             self.bucket_list.sort()
         else:
+            # value not present, so lets check if we can just add it
             if len(self.bucket_map.keys()) < self.size:
+                # we can (havent reached size yet)
                 if self.bucket_list[0].value() > 1:
                     self.bucket_list.insert(0, Bucket(1))
                     self.bucket_list[0].insert(e)
@@ -118,6 +124,7 @@ class StreamSummary(object):
                     self.bucket_map[e] = self.bucket_list[0]
                     self.bucket_list[0].insert(e)
             else:
+                # we're full, so to add this we need to eject a value
                 ejected = self.bucket_list[0].min()
                 ejected_val = self.bucket_list[0].value()
                 del self.bucket_map[ejected]

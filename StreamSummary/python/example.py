@@ -1,5 +1,6 @@
+#!/usr/bin/python
 """
-Copyright (C) 2012-2013  Bryant Moscon - bmoscon@gmail.com
+Copyright (C) 2012-2014  Bryant Moscon - bmoscon@gmail.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to 
@@ -47,7 +48,7 @@ from stream_summary import StreamSummary
 
 def main():
     if len(sys.argv) != 3:
-        print ("Usage ss_test.py <StreamSummary Size> <file_name>")
+        print ("Usage: example.py <StreamSummary Size> <file_name>")
         return
 
     size = sys.argv[1]
