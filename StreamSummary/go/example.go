@@ -1,4 +1,5 @@
-Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
+/******************************************************************************************* 
+ Copyright (C) 2013-2015 Bryant Moscon - bmoscon@gmail.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to 
@@ -13,8 +14,7 @@ Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
  2. Redistributions in binary form must reproduce the above copyright notice, 
     this list of conditions and the following disclaimer in the documentation 
     and/or other materials provided with the distribution, and in the same 
-    place and form as other copyright,
-    license and disclaimer information.
+    place and form as other copyright, license and disclaimer information.
 
  3. The end-user documentation included with the redistribution, if any, must 
     include the following acknowledgment: "This product includes software 
@@ -36,4 +36,28 @@ Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
  THE SOFTWARE.
+************************************************************************************/
 
+package main
+
+
+import (
+	"fmt"
+	"./streamsummary"
+)
+
+
+
+func main() {
+	a := streamsummary.NewStreamSummary(2)
+	a.Add("a")
+	a.Add("b")
+	a.Add("a")
+	a.Add("c")
+
+	a.Print()
+
+	fmt.Println("a exists? ", a.Exists("a"))
+	fmt.Println("b exists? ", a.Exists("b"))
+	fmt.Println(a.GetStream())
+}

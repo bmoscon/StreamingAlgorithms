@@ -1,3 +1,7 @@
+September 14, 2015:
+	* Moved code from GoStream repo to this repo. No reason to have a separate 
+          repo for a single language, when this already includes multiple languages
+
 September 28, 2013:
 	* fixed various bugs in StreamSummary, added destructor, etc
 	* ported stream summary to python
