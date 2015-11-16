@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-Copyright (C) 2012-2014  Bryant Moscon - bmoscon@gmail.com
+Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to 
@@ -63,6 +63,11 @@ def main():
         ss.add(e)
 
     print(ss)
+    print(ss.to_value_dict())
+    print(ss.to_item_dict())
+    print(ss.to_list())
+    print(ss.exists("b"))
+    print(ss.exists("zzzzz"))
     
 
 if __name__ == "__main__":

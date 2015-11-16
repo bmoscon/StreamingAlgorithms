@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2014  Bryant Moscon - bmoscon@gmail.com
+Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to 
@@ -41,13 +41,19 @@ Copyright (C) 2012-2014  Bryant Moscon - bmoscon@gmail.com
 """
 
 from bisect import bisect_left
+from itertools import chain
 
 
 class Bucket(object):
+    '''
+    A bucket is a list of objects with the same value
+    '''
+    
     def __init__(self, v):
         self.val = v
         self.items = []
 
+        
     def __lt__(self, other):
         # need to check if other is an int (for bisect left) or
         # another bucket object (for when it is sorted)
@@ -78,9 +84,13 @@ class Bucket(object):
 
 
 class StreamSummary(object):
+    '''
+    Summarizes a Stream into the top N-1 number of objects (where N == SIZE). The last object 
+    in the StreamSummary (i.e. the Nth object) should be ignored.
+    '''
     def __init__(self, size):
         self.size = size
-        # maps items to buckets
+        # maps buckets to items -- bucket_value (int) : list of items
         self.bucket_map = {}
         # sorted list of buckets (in order by value)
         self.bucket_list = []
@@ -100,9 +110,62 @@ class StreamSummary(object):
         end = len(self.bucket_list)
         index = bisect_left(self.bucket_list, value, 0, end)
         return index if index != end and self.bucket_list[index].value() == value else None
-        
+
+
+    def clear(self):
+        '''
+        Resets the Stream Summary object to its starting state
+        '''
+        self.bucket_map = {}
+        self.bucket_list = []
+        self.bucket_list.append(Bucket(1))
+
+    
+    def to_value_dict(self):
+        '''
+        Returns a dictionary of value -> list of objects that share this value
+        '''
+        ret = {}
+        for b in self.bucket_list:
+            for i in b.items:
+                ret[i] = b.value()
+        return ret
+
+    
+    def to_item_dict(self):
+        '''
+        Returns a dictionary of item -> item value
+        '''
+        ret = {}
+        for b in self.bucket_list:
+            ret[b.value()] = b.items.copy()
+        return ret
+
+    
+    def to_list(self):
+        '''
+        Returns a list of the items in the StreamSummary object
+        '''
+        return list(chain.from_iterable([b.items for b in self.bucket_list]))
+
+
+    def exists(self, item):
+        '''
+        Checks if item exists in the current top seen items.
+        Note: this can be slow for large sized StreamSummary objects.
+        Worst case O(n^2), but can be made O(n) by using more memory
+        (add in a dict that maps items -> values)
+        '''
+        for b in self.bucket_list:
+            if item in b.items:
+                return True
+        return False
+    
 
     def add(self, e):
+        '''
+        Adds an item to the StreamSummary object
+        '''
         # first check to see if item already present
         if e in self.bucket_map:
             # if so, remove it from old bucket
