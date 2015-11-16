@@ -51,30 +51,28 @@ class Bucket(object):
         self.items = []
 
         
-    def __lt__(self, other):
-        # need to check if other is an int (for bisect left) or
-        # another bucket object (for when it is sorted)
-        if type(other) is int:
-            return self.val < other
-        return self.val < other.value()
-
     def __str__(self):
         s = "Bucket " + str(self.val) + "\n"
         s += str(self.items)
         return s
 
+    
     def insert(self, e):
         self.items.append(e)
-    
+
+        
     def oldest(self):
         return self.items[0]
 
+    
     def size(self):
         return len(self.items)
 
+    
     def remove(self, e):
         self.items.remove(e)
 
+        
     def value(self):
         return self.val
         
@@ -101,6 +99,7 @@ class StreamSummary(object):
             s += '\n'
         return s
 
+    
     def __increment(self, item):
         '''
         item exists, so remove it from its current bucket, and
