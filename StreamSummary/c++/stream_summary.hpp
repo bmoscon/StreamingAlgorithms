@@ -8,7 +8,7 @@
  *   by A. Metwally, D. Agrawal, and E. Abbadi
  *
  *
- * Copyright (C) 2013  Bryant Moscon - bmoscon@gmail.com
+ * Copyright (C) 2013-2015  Bryant Moscon - bmoscon@gmail.com
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to 
@@ -51,6 +51,7 @@
 #ifndef __STREAM_SUMMARY__
 #define __STREAM_SUMMARY__
 
+
 #include <stdint.h>
 #include <vector>
 #include <cassert>
@@ -58,63 +59,64 @@
 #include <map>
 #include <list>
 
+
 template <class T>
 class Bucket {
 public:
-  Bucket(const uint64_t &v = 1) : value_(v) {}
+    Bucket(const uint64_t &v = 1) : value_(v) {}
   
-  void insert(const T &obj)
-  {
-    list_.push_back(obj);
-  }
-
-  void remove(const T &obj)
-  {
-    typename std::list<T>::iterator it;
-    
-    for (it = list_.begin(); it != list_.end(); ++it) {
-      if (*it == obj) {
-	list_.erase(it);
-	return;
-      }
+    void insert(const T &obj)
+    {
+	list_.push_back(obj);
     }
     
-    // we should only arrive here if obj is not in the list, which should never happen
-    // so throw an error
-    assert(false);
-  }
-
-  uint64_t getValue() const
-  {
-    return (value_);
-  }
-
-  size_t getSize() const
-  {
-    return (list_.size());
-  }
-
-  T getMin() const
-  {
-    assert(list_.size() > 0);
-    return (list_.front());
-  }
-
-  void print() const 
-  {
-    std::cout << value_ << std::endl;
-
-    typename std::list<T>::const_iterator it;
-    for (it = list_.begin(); it != list_.end(); ++it) {
-      std::cout << *it << " ";
+    void remove(const T &obj)
+    {
+	typename std::list<T>::iterator it;
+	
+	for (it = list_.begin(); it != list_.end(); ++it) {
+	    if (*it == obj) {
+		list_.erase(it);
+		return;
+	    }
+	}
+	
+	// we should only arrive here if obj is not in the list, which should never happen
+	// so throw an error
+	assert(false);
     }
-    std::cout << std::endl << std::endl;;
-  }
-
+    
+    uint64_t getValue() const
+    {
+	return (value_);
+    }
+    
+    size_t getSize() const
+    {
+	return (list_.size());
+    }
+    
+    T getMin() const
+    {
+	assert(list_.size() > 0);
+	return (list_.front());
+    }
+    
+    void print() const 
+    {
+	std::cout << value_ << std::endl;
+	
+	typename std::list<T>::const_iterator it;
+	for (it = list_.begin(); it != list_.end(); ++it) {
+	    std::cout << *it << " ";
+	}
+	std::cout << std::endl << std::endl;;
+    }
+    
 private:
-
-  uint64_t value_;
-  std::list<T> list_;
+    
+    uint64_t value_;
+    std::list<T> list_;
 };
 
 
@@ -122,195 +124,194 @@ template <class T>
 class StreamSummary
 {
 public:
-  StreamSummary(const uint64_t &size) : max_size(size) {}
-
-  ~StreamSummary()
-  {
-    clear();
-  }
-
-  void add(const T &obj)
-  {
-    bm_ret ret;
+    StreamSummary(const uint64_t &size) : max_size(size) {}
     
-    ret = exists(obj);
-
-    if (ret.second) {
-      increment(obj, ret.first);
-    } else if (bucket_map.size() < max_size) {
-      insert(obj);
-    } else {
-      replace_and_insert(obj);
-    }
-  }
-
-
-  bool exists(const T &obj) const
-  {
-    typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
-
-    it = bucket_map.find(obj);
-
-    return (it != bucket_map.cend());
-  }
-
-
-  // thanks to copy elision/RVO the compiler will
-  // elide the copy, so no performance hit
-  // in returning a copy of the local variable
-  std::vector<T> elementList() const
-  {
-    std::vector<T> ret;
-     typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
-    
-    for (it = bucket_map.begin(); it != bucket_map.end(); ++it) {
-      ret.push_back(it->first);
+    ~StreamSummary()
+    {
+	clear();
     }
     
-    return (ret);
-  }
-
-
-  void clear ()
-  {
-    v_it vit;
-    Bucket<T> *b;
-    
-    vit = value_map.begin(); 
-    while (vit != value_map.end()) {
-      b = vit->second;
-      vit = value_map.erase(vit);
-      delete b;
-    }
-
-    bucket_map.clear();
-  }
-
-
-  void print() const
-  {
-    typename std::map<uint64_t, Bucket<T> *>::const_iterator it;
-    for (it = value_map.begin(); it != value_map.end(); ++it) {
-      it->second->print();
+    void add(const T &obj)
+    {
+	bm_ret ret;
+	
+	ret = exists(obj);
+	
+	if (ret.second) {
+	    increment(obj, ret.first);
+	} else if (bucket_map.size() < max_size) {
+	    insert(obj);
+	} else {
+	    replace_and_insert(obj);
+	}
     }
     
-  }
-
-
+    
+    bool exists(const T &obj) const
+    {
+	typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
+	
+	it = bucket_map.find(obj);
+	
+	return (it != bucket_map.cend());
+    }
+    
+    
+    // thanks to copy elision/RVO the compiler will
+    // elide the copy, so no performance hit
+    // in returning a copy of the local variable
+    std::vector<T> elementList() const
+    {
+	std::vector<T> ret;
+	typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
+	
+	for (it = bucket_map.begin(); it != bucket_map.end(); ++it) {
+	    ret.push_back(it->first);
+	}
+	
+	return (ret);
+    }
+    
+    
+    void clear ()
+    {
+	v_it vit;
+	Bucket<T> *b;
+	
+	vit = value_map.begin(); 
+	while (vit != value_map.end()) {
+	    b = vit->second;
+	    vit = value_map.erase(vit);
+	    delete b;
+	}
+	
+	bucket_map.clear();
+    }
+    
+    
+    void print() const
+    {
+	typename std::map<uint64_t, Bucket<T> *>::const_iterator it;
+	for (it = value_map.begin(); it != value_map.end(); ++it) {
+	    it->second->print();
+	}
+	
+    }
+    
+    
 private:
-  typedef typename std::unordered_map<T, Bucket<T> *>::iterator bm_it;
-  typedef typename std::map<uint64_t, Bucket<T> *>::iterator v_it;
-  typedef std::pair<bm_it, bool> bm_ret;
-  typedef std::pair<v_it, bool> v_ret;
-  
-
-  bm_ret exists(const T &obj)
-  {
-    bm_it it = bucket_map.find(obj);
+    typedef typename std::unordered_map<T, Bucket<T> *>::iterator bm_it;
+    typedef typename std::map<uint64_t, Bucket<T> *>::iterator v_it;
+    typedef std::pair<bm_it, bool> bm_ret;
+    typedef std::pair<v_it, bool> v_ret;
     
-    if (it == bucket_map.end()) {
-      return (std::make_pair(it, false));
-    }
-
-    return (std::make_pair(it, true));
-  }
-  
-  void increment(const T &obj, bm_it &it)
-  {
-    Bucket<T> *b = it->second;
-    uint64_t val = b->getValue();
-
-    // regardless of what path we take below, we need to remove the old entry 
-    // from the original bucket
-    b->remove(obj);
-    // if bucket is now empty, we can remove it
-    if (b->getSize() == 0) {
-      value_map.erase(val);
-      delete b;
+    
+    bm_ret exists(const T &obj)
+    {
+	bm_it it = bucket_map.find(obj);
+	
+	if (it == bucket_map.end()) {
+	    return (std::make_pair(it, false));
+	}
+	
+	return (std::make_pair(it, true));
     }
     
-    // check if bucket of val+1 exists
-    v_it value_it = value_map.find(val + 1);
-    v_ret value_ret;
-
-    if (value_it != value_map.end()) {
-      // bucket exists, insert object
-      value_it->second->insert(obj);
-      it->second = value_it->second;
-    } else {
-      // does not exits, create new bucket
-      it->second = new Bucket<T>(val+1);
-      value_ret = value_map.insert(std::make_pair(val + 1, it->second));
-      assert(value_ret.second);
-      it->second->insert(obj);
+    void increment(const T &obj, bm_it &it)
+    {
+	Bucket<T> *b = it->second;
+	uint64_t val = b->getValue();
+	
+	// regardless of what path we take below, we need to remove the old entry 
+	// from the original bucket
+	b->remove(obj);
+	// if bucket is now empty, we can remove it
+	if (b->getSize() == 0) {
+	    value_map.erase(val);
+	    delete b;
+	}
+	
+	// check if bucket of val+1 exists
+	v_it value_it = value_map.find(val + 1);
+	v_ret value_ret;
+	
+	if (value_it != value_map.end()) {
+	    // bucket exists, insert object
+	    value_it->second->insert(obj);
+	    it->second = value_it->second;
+	} else {
+	    // does not exits, create new bucket
+	    it->second = new Bucket<T>(val+1);
+	    value_ret = value_map.insert(std::make_pair(val + 1, it->second));
+	    assert(value_ret.second);
+	    it->second->insert(obj);
+	}
     }
-  }
-  
-  void insert(const T &obj)
-  {
-    bm_ret ret;
-    v_it value_it;
-    v_ret value_ret;
-
-    value_it = value_map.find(1);
-
-    // check if bucket with value 1 exists
-    if (value_it == value_map.end()) {
-      ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(1)));
-      assert(ret.second);
-      value_ret = value_map.insert(std::make_pair(1, ret.first->second));
-      assert(value_ret.second);
-      ret.first->second->insert(obj);
-    } else {
-      value_it->second->insert(obj);
-      ret = bucket_map.insert(std::make_pair(obj, value_it->second));
-      assert(ret.second);
+    
+    void insert(const T &obj)
+    {
+	bm_ret ret;
+	v_it value_it;
+	v_ret value_ret;
+	
+	value_it = value_map.find(1);
+	
+	// check if bucket with value 1 exists
+	if (value_it == value_map.end()) {
+	    ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(1)));
+	    assert(ret.second);
+	    value_ret = value_map.insert(std::make_pair(1, ret.first->second));
+	    assert(value_ret.second);
+	    ret.first->second->insert(obj);
+	} else {
+	    value_it->second->insert(obj);
+	    ret = bucket_map.insert(std::make_pair(obj, value_it->second));
+	    assert(ret.second);
+	}
     }
-  }
-  
-  void replace_and_insert(const T &obj)
-  {
-    Bucket<T> *b = value_map.begin()->second;
-    uint64_t val = b->getValue();
-    T old = b->getMin();
-
-    // remove old object
-    b->remove(old);
-    bucket_map.erase(old);
-
-    // check size of old bucket
-    if (b->getSize() == 0) {
-      value_map.erase(val);
-      delete b;
+    
+    void replace_and_insert(const T &obj)
+    {
+	Bucket<T> *b = value_map.begin()->second;
+	uint64_t val = b->getValue();
+	T old = b->getMin();
+	
+	// remove old object
+	b->remove(old);
+	bucket_map.erase(old);
+	
+	// check size of old bucket
+	if (b->getSize() == 0) {
+	    value_map.erase(val);
+	    delete b;
+	}
+	
+	// check if bucket of val+1 exists
+	v_it value_it;
+	bm_ret ret;
+	v_ret value_ret;
+	value_it = value_map.find(val + 1);
+	if (value_it != value_map.end()) {
+	    // bucket exists, insert object
+	    value_it->second->insert(obj);
+	    // insert obj into map
+	    ret = bucket_map.insert(std::make_pair(obj, value_it->second));
+	    assert(ret.second);
+	} else {
+	    // does not exits, create new bucket
+	    ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(val+1)));
+	    assert(ret.second);
+	    value_ret = value_map.insert(std::make_pair(val + 1, ret.first->second));
+	    assert(value_ret.second);
+	    ret.first->second->insert(obj);
+	}
     }
-
-    // check if bucket of val+1 exists
-    v_it value_it;
-    bm_ret ret;
-    v_ret value_ret;
-    value_it = value_map.find(val + 1);
-    if (value_it != value_map.end()) {
-      // bucket exists, insert object
-      value_it->second->insert(obj);
-      // insert obj into map
-      ret = bucket_map.insert(std::make_pair(obj, value_it->second));
-      assert(ret.second);
-    } else {
-      // does not exits, create new bucket
-      ret = bucket_map.insert(std::make_pair(obj, new Bucket<T>(val+1)));
-      assert(ret.second);
-      value_ret = value_map.insert(std::make_pair(val + 1, ret.first->second));
-      assert(value_ret.second);
-      ret.first->second->insert(obj);
-    }
-  }
-  
-  
-  uint64_t max_size;
-  std::unordered_map<T, Bucket<T> *> bucket_map;
-  std::map<uint64_t, Bucket<T> *> value_map;
+    
+    
+    uint64_t max_size;
+    std::unordered_map<T, Bucket<T> *> bucket_map;
+    std::map<uint64_t, Bucket<T> *> value_map;
 };
-
 
 
 #endif
