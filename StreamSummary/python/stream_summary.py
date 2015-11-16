@@ -41,9 +41,6 @@ Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
 """
 
 
-from itertools import chain
-
-
 class Bucket(object):
     '''
     A bucket is a list of objects with the same value
