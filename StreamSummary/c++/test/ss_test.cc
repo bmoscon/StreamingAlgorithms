@@ -57,61 +57,61 @@
 
 std::string read_file(const char* file)
 {
-  std::ifstream file_h(file);
-  std::string data;
-
-  if (file_h.is_open()) {
-    file_h.seekg(0, std::ios::end);
-    data.resize(file_h.tellg());
-    file_h.seekg(0, std::ios::beg);
-    file_h.read(&data[0], data.size());
-    file_h.close();
-  } else {
-    perror("error");
-    exit(1);
-  }
-  
-  return(data);
+    std::ifstream file_h(file);
+    std::string data;
+    
+    if (file_h.is_open()) {
+	file_h.seekg(0, std::ios::end);
+	data.resize(file_h.tellg());
+	file_h.seekg(0, std::ios::beg);
+	file_h.read(&data[0], data.size());
+	file_h.close();
+    } else {
+	perror("error");
+	exit(1);
+    }
+    
+    return(data);
 }
 
 
 int main(int argc, char* argv[])
 {
-  std::string line;
-  std::string data;
-  
-  if (argc != 3) {
-    std::cout << "usage: test_ss <filter_size> <input file>" << std::endl;
-    exit(1);
-  }
-  
-  StreamSummary<std::string> a(atoi(argv[1]));
-
-  data = read_file(argv[2]);
-  std::stringstream stream(data);
-
- 
-  while (std::getline(stream, line)) {
-    if (!line.size()) {
-      // blank lines (i.e. lines with only a carriage return) will have line with len 0
-      continue;
+    std::string line;
+    std::string data;
+    
+    if (argc != 3) {
+	std::cout << "usage: test_ss <filter_size> <input file>" << std::endl;
+	exit(1);
     }
-    if (line[0] != '#') {
-      a.add(line);
+    
+    StreamSummary<std::string> a(atoi(argv[1]));
+    
+    data = read_file(argv[2]);
+    std::stringstream stream(data);
+    
+    
+    while (std::getline(stream, line)) {
+	if (!line.size()) {
+	    // blank lines (i.e. lines with only a carriage return) will have line with len 0
+	    continue;
+	}
+	if (line[0] != '#') {
+	    a.add(line);
+	}
     }
-  }
-  std::cout << std::endl;
-
-  std::cout << "print produces:\n";
-  a.print();
-  
-  std::cout << "top object vector:\n";
-  std::vector<std::string> v = a.elementList();
-  
-  for (unsigned int i = 0; i < v.size(); ++i) {
-    std::cout<< v[i] << " ";
-  }
-  std::cout << std::endl;
-
-  return (0);
+    std::cout << std::endl;
+    
+    std::cout << "print produces:\n";
+    a.print();
+    
+    std::cout << "top object vector:\n";
+    std::vector<std::string> v = a.to_list();
+    
+    for (unsigned int i = 0; i < v.size(); ++i) {
+	std::cout<< v[i] << " ";
+    }
+    std::cout << std::endl;
+    
+    return (0);
 }

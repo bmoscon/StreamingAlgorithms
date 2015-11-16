@@ -63,11 +63,13 @@ def main():
         ss.add(e)
 
     print(ss)
-    print(ss.to_value_dict())
-    print(ss.to_item_dict())
-    print(ss.to_list())
-    print(ss.exists("b"))
-    print(ss.exists("zzzzz"))
+    elements = ss.to_list()
+    print(elements)
+    print(ss.exists(elements[0]))
+    ss.clear()
+    print(ss.exists(elements[0]))
+    
+   
     
 
 if __name__ == "__main__":

@@ -64,7 +64,7 @@ template <class T>
 class Bucket {
 public:
     Bucket(const uint64_t &v = 1) : value_(v) {}
-  
+    
     void insert(const T &obj)
     {
 	list_.push_back(obj);
@@ -86,17 +86,17 @@ public:
 	assert(false);
     }
     
-    uint64_t getValue() const
+    uint64_t value() const
     {
 	return (value_);
     }
     
-    size_t getSize() const
+    size_t size() const
     {
 	return (list_.size());
     }
     
-    T getMin() const
+    T min() const
     {
 	assert(list_.size() > 0);
 	return (list_.front());
@@ -112,9 +112,9 @@ public:
 	}
 	std::cout << std::endl << std::endl;;
     }
+
     
-private:
-    
+private:    
     uint64_t value_;
     std::list<T> list_;
 };
@@ -146,7 +146,6 @@ public:
 	}
     }
     
-    
     bool exists(const T &obj) const
     {
 	typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
@@ -156,11 +155,10 @@ public:
 	return (it != bucket_map.cend());
     }
     
-    
     // thanks to copy elision/RVO the compiler will
     // elide the copy, so no performance hit
     // in returning a copy of the local variable
-    std::vector<T> elementList() const
+    std::vector<T> to_list() const
     {
 	std::vector<T> ret;
 	typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
@@ -171,7 +169,6 @@ public:
 	
 	return (ret);
     }
-    
     
     void clear ()
     {
@@ -188,14 +185,12 @@ public:
 	bucket_map.clear();
     }
     
-    
     void print() const
     {
 	typename std::map<uint64_t, Bucket<T> *>::const_iterator it;
 	for (it = value_map.begin(); it != value_map.end(); ++it) {
 	    it->second->print();
-	}
-	
+	}	
     }
     
     
@@ -220,13 +215,13 @@ private:
     void increment(const T &obj, bm_it &it)
     {
 	Bucket<T> *b = it->second;
-	uint64_t val = b->getValue();
+	uint64_t val = b->value();
 	
 	// regardless of what path we take below, we need to remove the old entry 
 	// from the original bucket
 	b->remove(obj);
 	// if bucket is now empty, we can remove it
-	if (b->getSize() == 0) {
+	if (b->size() == 0) {
 	    value_map.erase(val);
 	    delete b;
 	}
@@ -273,15 +268,15 @@ private:
     void replace_and_insert(const T &obj)
     {
 	Bucket<T> *b = value_map.begin()->second;
-	uint64_t val = b->getValue();
-	T old = b->getMin();
+	uint64_t val = b->value();
+	T old = b->min();
 	
 	// remove old object
 	b->remove(old);
 	bucket_map.erase(old);
 	
 	// check size of old bucket
-	if (b->getSize() == 0) {
+	if (b->size() == 0) {
 	    value_map.erase(val);
 	    delete b;
 	}

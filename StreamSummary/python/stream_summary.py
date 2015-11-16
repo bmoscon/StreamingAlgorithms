@@ -40,7 +40,7 @@ Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
 
 """
 
-from bisect import bisect_left
+
 from itertools import chain
 
 
@@ -69,7 +69,7 @@ class Bucket(object):
     def insert(self, e):
         self.items.append(e)
     
-    def min(self):
+    def oldest(self):
         return self.items[0]
 
     def size(self):
@@ -82,7 +82,6 @@ class Bucket(object):
         return self.val
         
 
-
 class StreamSummary(object):
     '''
     Summarizes a Stream into the top N-1 number of objects (where N == SIZE). The last object 
@@ -90,135 +89,118 @@ class StreamSummary(object):
     '''
     def __init__(self, size):
         self.size = size
-        # maps buckets to items -- bucket_value (int) : list of items
+        # maps bucket value -> bucket
         self.bucket_map = {}
-        # sorted list of buckets (in order by value)
-        self.bucket_list = []
-        # first item added will go into bucket 1, so add it now
-        self.bucket_list.append(Bucket(1))
+        # maps item -> bucket
+        self.item_map = {}
+        # keeps track of the minimum valued bucket
+        self.min_val = 0
 
-        
+
     def __str__(self):
-        s = ""
-        for b in self.bucket_list:
-            s += str(b) 
-            s += "\n"
+        s = ''
+        for key in self.bucket_map.keys():
+            s += str(self.bucket_map[key])
+            s += '\n'
         return s
 
+    def __increment(self, item):
+        '''
+        item exists, so remove it from its current bucket, and
+        insert it into bucket+1
+        '''
+        # get value of item, and remove the item from that bucket.
+        # if bucket is empty, remove it
+        b = self.item_map[item]
+        val = b.value()
+        b.remove(item)
 
-    def __find_bucket(self, value):
-        end = len(self.bucket_list)
-        index = bisect_left(self.bucket_list, value, 0, end)
-        return index if index != end and self.bucket_list[index].value() == value else None
+        if b.size() == 0:
+            del self.bucket_map[val]
+            if self.min_val == val:
+                self.min_val += 1
+
+        # find bucket+1. Create if needed. Insert item in bucket
+        if val+1 in self.bucket_map:
+            b = self.bucket_map[val+1]
+        else:
+            b = Bucket(val+1)
+            self.bucket_map[val+1] = b
+
+        b.insert(item)
+        self.item_map[item] = b
 
 
-    def clear(self):
+    def __insert(self, item):
         '''
-        Resets the Stream Summary object to its starting state
+        new item, insert into Bucket(1)
         '''
-        self.bucket_map = {}
-        self.bucket_list = []
-        self.bucket_list.append(Bucket(1))
+        if 1 in self.bucket_map:
+            b = self.bucket_map[1]
+        else:
+            b = Bucket(1)
+            self.bucket_map[1] = b
+            self.min_val = 1
 
-    
-    def to_value_dict(self):
-        '''
-        Returns a dictionary of value -> list of objects that share this value
-        '''
-        ret = {}
-        for b in self.bucket_list:
-            for i in b.items:
-                ret[i] = b.value()
-        return ret
+        b.insert(item)
+        self.item_map[item] = b
 
-    
-    def to_item_dict(self):
-        '''
-        Returns a dictionary of item -> item value
-        '''
-        ret = {}
-        for b in self.bucket_list:
-            ret[b.value()] = b.items.copy()
-        return ret
 
-    
-    def to_list(self):
+    def __eject_and_insert(self, item):
         '''
-        Returns a list of the items in the StreamSummary object
+        eject lowest ranked item, insert new item with 
+        ejected_value+1
         '''
-        return list(chain.from_iterable([b.items for b in self.bucket_list]))
+
+        b = self.bucket_map[self.min_val]
+        old = b.oldest()
+        new_val = self.min_val + 1
+        b.remove(old)
+        del self.item_map[old]
+        if b.size() == 0:
+            del self.bucket_map[self.min_val]
+            self.min_val += 1
+
+        if new_val in self.bucket_map:
+            b = self.bucket_map[new_val]
+        else:
+            b = Bucket(new_val)
+            self.bucket_map[new_val] = b
+
+        b.insert(item)
+        self.item_map[item] = b
+
+
+    def add(self, item):
+        '''
+        adds an item to the summarized stream
+        '''
+        if item in self.item_map:
+            self.__increment(item)
+        elif len(self.item_map) < self.size:
+            self.__insert(item)
+        else:
+            self.__eject_and_insert(item)
 
 
     def exists(self, item):
-        '''
-        Checks if item exists in the current top seen items.
-        Note: this can be slow for large sized StreamSummary objects.
-        Worst case O(n^2), but can be made O(n) by using more memory
-        (add in a dict that maps items -> values)
-        '''
-        for b in self.bucket_list:
-            if item in b.items:
-                return True
-        return False
-    
+        return item in self.item_map
 
-    def add(self, e):
-        '''
-        Adds an item to the StreamSummary object
-        '''
-        # first check to see if item already present
-        if e in self.bucket_map:
-            # if so, remove it from old bucket
-            b = self.bucket_map[e]
-            v = b.value()
-            
-            b.remove(e)
-            # if old bucket is empty, we can remove it
-            if b.size() == 0:
-                self.bucket_list.remove(b)
-            # find new bucket and insert there using binary search
-            bucket_index = self.__find_bucket(v + 1)
-            if bucket_index is not None:
-                self.bucket_list[bucket_index].insert(e)
-                self.bucket_map[e] = self.bucket_list[bucket_index]
-            else:
-                # new bucket of value <old value + 1> doesnt exist
-                # so create it now
-                b = Bucket(v + 1)
-                b.insert(e)
-                self.bucket_map[e] = b
-                self.bucket_list.append(b)
-                self.bucket_list.sort()
-        else:
-            # value not present, so lets check if we can just add it
-            if len(self.bucket_map.keys()) < self.size:
-                # we can (havent reached size yet)
-                if self.bucket_list[0].value() > 1:
-                    self.bucket_list.insert(0, Bucket(1))
-                    self.bucket_list[0].insert(e)
-                    self.bucket_map[e] = self.bucket_list[0]
-                else:
-                    self.bucket_map[e] = self.bucket_list[0]
-                    self.bucket_list[0].insert(e)
-            else:
-                # we're full, so to add this we need to eject a value
-                ejected = self.bucket_list[0].min()
-                ejected_val = self.bucket_list[0].value()
-                del self.bucket_map[ejected]
-                self.bucket_list[0].remove(ejected)
-                # if the bucket is empty now, we can remove it
-                if self.bucket_list[0].size() == 0:
-                    del self.bucket_list[0]
-                
-                # look up new bucket
-                bucket_index = self.__find_bucket(ejected_val + 1)
-                if bucket_index is not None:
-                    self.bucket_list[bucket_index].insert(e)
-                    self.bucket_map[e] = self.bucket_list[bucket_index]
-                else:
-                    b = Bucket(ejected_val + 1)
-                    b.insert(e)
-                    self.bucket_list.append(b)
-                    self.bucket_list.sort()
-                    self.bucket_map[e] = b
+
+    def clear(self):
+        self.bucket_map = {}
+        self.item_map = {}
+        self.min_val = 0
+
+
+    def to_list(self):
+        return [item for item in self.item_map]
+
+        
+        
+        
+    
+   
+
+   
 
