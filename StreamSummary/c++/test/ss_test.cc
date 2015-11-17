@@ -102,11 +102,11 @@ int main(int argc, char* argv[])
     }
     std::cout << std::endl;
     
-    std::cout << "print produces:\n";
-    a.print();
+    std::cout << "printing object:\n";
+    std::cout << a;
     
     std::cout << "top object vector:\n";
-    std::vector<std::string> v = a.to_list();
+    std::vector<std::string> v = a.to_vector();
     
     for (unsigned int i = 0; i < v.size(); ++i) {
 	std::cout<< v[i] << " ";

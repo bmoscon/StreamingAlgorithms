@@ -58,6 +58,7 @@
 #include <unordered_map>
 #include <map>
 #include <list>
+#include <iostream>
 
 
 template <class T>
@@ -101,18 +102,9 @@ public:
 	assert(list_.size() > 0);
 	return (list_.front());
     }
-    
-    void print() const 
-    {
-	std::cout << value_ << std::endl;
-	
-	typename std::list<T>::const_iterator it;
-	for (it = list_.begin(); it != list_.end(); ++it) {
-	    std::cout << *it << " ";
-	}
-	std::cout << std::endl << std::endl;;
-    }
 
+    template <class U>
+    friend std::ostream& operator<<(std::ostream& os, const Bucket<U>& b);
     
 private:    
     uint64_t value_;
@@ -158,7 +150,7 @@ public:
     // thanks to copy elision/RVO the compiler will
     // elide the copy, so no performance hit
     // in returning a copy of the local variable
-    std::vector<T> to_list() const
+    std::vector<T> to_vector() const
     {
 	std::vector<T> ret;
 	typename std::unordered_map<T, Bucket<T> *>::const_iterator it;
@@ -184,15 +176,9 @@ public:
 	
 	bucket_map.clear();
     }
-    
-    void print() const
-    {
-	typename std::map<uint64_t, Bucket<T> *>::const_iterator it;
-	for (it = value_map.begin(); it != value_map.end(); ++it) {
-	    it->second->print();
-	}	
-    }
-    
+
+    template <class U>
+    friend std::ostream& operator<<(std::ostream& os, const StreamSummary<U>& s);
     
 private:
     typedef typename std::unordered_map<T, Bucket<T> *>::iterator bm_it;
@@ -307,6 +293,33 @@ private:
     std::unordered_map<T, Bucket<T> *> bucket_map;
     std::map<uint64_t, Bucket<T> *> value_map;
 };
+
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, const Bucket<T>& b)
+{
+    os << b.value() << "-> ";
+	
+    typename std::list<T>::const_iterator it;
+    for (it = b.list_.begin(); it != b.list_.end(); ++it) {
+	os << *it << " ";
+    }
+
+    return (os);
+}
+
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, const StreamSummary<T>& s)
+{
+    typename std::map<uint64_t, Bucket<T> *>::const_iterator it;
+    for (it = s.value_map.begin(); it != s.value_map.end(); ++it) {
+	os << *(it->second);
+	os << std::endl << std::endl;
+    }
+    
+    return (os);
+}
 
 
 #endif
