@@ -1,4 +1,5 @@
 from ..stream_summary import Bucket, StreamSummary
+import random
 
 
 '''
@@ -55,6 +56,38 @@ def test_stream_summary_add():
     assert(2 in ss.bucket_map)
     assert(ss.bucket_map[1].size() == 1)
     assert(ss.bucket_map[2].size() == 1)
+
+
+def test_stream_summary_add_complex():
+    ss = StreamSummary(5)
+    for i in range(5):
+        ss.add(i+1)
+
+    ss.add(1)
+    ss.add(1)
+    ss.add(10)
+
+    assert(ss.bucket_map[3].items[0] == 1)
+    assert(ss.bucket_map[2].items[0] == 10)
+    assert(ss.bucket_map[1].size() == 3)
+    assert(ss.bucket_map[1].oldest() == 3)
+
+
+def test_stress_test():
+    ss = StreamSummary(1000)
+
+    for i in range(5000000):
+        ss.add(random.randint(0, 2500))
+
+    list_from_buckets = []
+    for b in ss.bucket_map.keys():
+        list_from_buckets.extend(ss.bucket_map[b].items)
+
+    list_from_map = ss.to_list()
+    assert(len(list_from_map) == len(list_from_buckets))
+    assert(set(list_from_map) == set(list_from_buckets))
+
+    
 
     
     
