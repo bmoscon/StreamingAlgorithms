@@ -1,3 +1,7 @@
+November 17, 2015:
+        * New python implementation of StreamSummary. Significantly more efficient and a lot cleaner (analagous to C++ version).
+        * New unit pytests for StreamSummary
+        
 September 14, 2015:
 	* Moved code from GoStream repo to this repo. No reason to have a separate 
           repo for a single language, when this already includes multiple languages
@@ -11,13 +15,13 @@ September 2, 2013:
 	* Checking return value of all insertions now
 
 March 30, 2013:
-	StreamSummary
-	Added unordered_map to Bucket class to avoid O(n) search for object to remove from bucket.
-	This uses more memory, but its probably an ok tradeoff for speed.
+	* StreamSummary
+	- Added unordered_map to Bucket class to avoid O(n) search for object to remove from bucket.
+	  This uses more memory, but its probably an ok tradeoff for speed.
 
-	BloomFilter
-	Added two new methods and a new constuctor. No longer necessary to pass a vector
-	of function pointers to constructor; use setHash to pass a fp vector, or use
-	addHash to add individual fps to the list
+	* BloomFilter
+	- Added two new methods and a new constuctor. No longer necessary to pass a vector
+	  of function pointers to constructor; use setHash to pass a fp vector, or use
+	  addHash to add individual fps to the list
 
 ChangeLog started March 30, 2013
