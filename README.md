@@ -1,5 +1,8 @@
 # [Streaming Algorithms](https://en.wikipedia.org/wiki/Streaming_algorithm)
 
+[![License](https://img.shields.io/badge/license-XFree86-blue.svg)](LICENSE)
+
+
 A Set of Streaming Algorithms. Types include:
 
 * Bloom Filters
