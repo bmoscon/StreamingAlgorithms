@@ -1,16 +1,19 @@
-# A Set of Streaming Algorithms. Types include:
+# [Streaming Algorithms](https://en.wikipedia.org/wiki/Streaming_algorithm)
 
- Bloom Filter
- Counting Bloom Filter
- Spectral Bloom Filter
+A Set of Streaming Algorithms. Types include:
 
- Count-Min Sketch
+* Bloom Filters
+   * Basic
+   * Counting
+   * Spectral
 
- Karp-Papadimitriou-Shenker
+* Count-Min Sketch
 
- Misra-Gries
+* Karp-Papadimitriou-Shenker
 
- Space Saving/Stream Summary
+* Misra-Gries
+
+* Space Saving/Stream Summary
 
 
 
