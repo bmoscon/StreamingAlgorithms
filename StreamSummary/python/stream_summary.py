@@ -1,5 +1,5 @@
 """
-Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
+Copyright (C) 2012-2016  Bryant Moscon - bmoscon@gmail.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to 
@@ -19,7 +19,7 @@ Copyright (C) 2012-2015  Bryant Moscon - bmoscon@gmail.com
 
  3. The end-user documentation included with the redistribution, if any, must 
     include the following acknowledgment: "This product includes software 
-    developed by Bryant Moscon (http://www.bryantmoscon.org/)", in the same 
+    developed by Bryant Moscon (http://www.bryantmoscon.com/)", in the same 
     place and form as other third-party acknowledgments. Alternately, this 
     acknowledgment may appear in the software itself, in the same form and 
     location as other such third-party acknowledgments.
@@ -47,35 +47,32 @@ class Bucket(object):
     '''
     
     def __init__(self, v):
-        self.val = v
-        self.items = []
+        self._val = v
+        self._items = []
 
-        
     def __str__(self):
-        s = "Bucket " + str(self.val) + "\n"
-        s += str(self.items)
+        s = "Bucket " + str(self._val) + "\n"
+        s += str(self._items)
         return s
 
-    
     def insert(self, e):
-        self.items.append(e)
+        self._items.append(e)
 
-        
     def oldest(self):
-        return self.items[0]
+        return self._items[0]
 
-    
     def size(self):
-        return len(self.items)
+        return len(self._items)
 
-    
     def remove(self, e):
-        self.items.remove(e)
+        self._items.remove(e)
 
-        
     def value(self):
-        return self.val
-        
+        return self._val
+
+    def items(self):
+        return self._items
+
 
 class StreamSummary(object):
     '''
@@ -91,14 +88,12 @@ class StreamSummary(object):
         # keeps track of the minimum valued bucket
         self.min_val = 0
 
-
     def __str__(self):
         s = ''
         for key in self.bucket_map.keys():
             s += str(self.bucket_map[key])
             s += '\n'
         return s
-
     
     def __increment(self, item):
         '''
@@ -126,7 +121,6 @@ class StreamSummary(object):
         b.insert(item)
         self.item_map[item] = b
 
-
     def __insert(self, item):
         '''
         new item, insert into Bucket(1)
@@ -140,7 +134,6 @@ class StreamSummary(object):
 
         b.insert(item)
         self.item_map[item] = b
-
 
     def __eject_and_insert(self, item):
         '''
@@ -166,7 +159,6 @@ class StreamSummary(object):
         b.insert(item)
         self.item_map[item] = b
 
-
     def add(self, item):
         '''
         adds an item to the summarized stream
@@ -178,7 +170,6 @@ class StreamSummary(object):
         else:
             self.__eject_and_insert(item)
 
-
     def exists(self, item):
         return item in self.item_map
 
@@ -188,15 +179,27 @@ class StreamSummary(object):
         self.item_map = {}
         self.min_val = 0
 
-
     def to_list(self):
         return [item for item in self.item_map]
 
-        
-        
-        
-    
-   
+    def save(self):
+        bm = self.bucket_map
+        data = {bm[item].value(): bm[item].items() for item in bm}
+        return {'size': self.size, 'data': data}
 
-   
+    def load(self, data):
+        self.clear()
+        self.size = data['size']
 
+        buckets = data['data']
+        
+        for d in buckets:
+            if d < self.min_val or self.min_val is 0:
+                self.min_val = d
+            b = Bucket(d)
+            b._items = buckets[d]
+            self.bucket_map[d] = b
+            for item in buckets[d]:
+                self.item_map[item] = b
+            
+            
