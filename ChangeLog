@@ -1,3 +1,7 @@
+November 15, 2016:
+        * Save and Load methods added to StreamSummary in Python. These methods allow the user to save the state of the StreamSummary
+	  object to JSON, and to load the state from JSON
+
 November 17, 2015:
         * New python implementation of StreamSummary. Significantly more efficient and a lot cleaner (analagous to C++ version).
         * New unit pytests for StreamSummary
