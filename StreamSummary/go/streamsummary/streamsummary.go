@@ -1,53 +1,53 @@
-/******************************************************************************************* 
- Copyright (C) 2013-2015 Bryant Moscon - bmoscon@gmail.com
- 
+/*******************************************************************************************
+ Copyright (C) 2013-2017 Bryant Moscon - bmoscon@gmail.com
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to 
- deal in the Software without restriction, including without limitation the 
+ of this software and associated documentation files (the "Software"), to
+ deal in the Software without restriction, including without limitation the
  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  sell copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
 
- 1. Redistributions of source code must retain the above copyright notice, 
+ 1. Redistributions of source code must retain the above copyright notice,
     this list of conditions, and the following disclaimer.
 
- 2. Redistributions in binary form must reproduce the above copyright notice, 
-    this list of conditions and the following disclaimer in the documentation 
-    and/or other materials provided with the distribution, and in the same 
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution, and in the same
     place and form as other copyright, license and disclaimer information.
 
- 3. The end-user documentation included with the redistribution, if any, must 
-    include the following acknowledgment: "This product includes software 
-    developed by Bryant Moscon (http://www.bryantmoscon.org/)", in the same 
-    place and form as other third-party acknowledgments. Alternately, this 
-    acknowledgment may appear in the software itself, in the same form and 
+ 3. The end-user documentation included with the redistribution, if any, must
+    include the following acknowledgment: "This product includes software
+    developed by Bryant Moscon (http://www.bryantmoscon.com/)", in the same
+    place and form as other third-party acknowledgments. Alternately, this
+    acknowledgment may appear in the software itself, in the same form and
     location as other such third-party acknowledgments.
 
  4. Except as contained in this notice, the name of the author, Bryant Moscon,
-    shall not be used in advertising or otherwise to promote the sale, use or 
-    other dealings in this Software without prior written authorization from 
+    shall not be used in advertising or otherwise to promote the sale, use or
+    other dealings in this Software without prior written authorization from
     the author.
 
 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 ************************************************************************************/
 
 package streamsummary
 
 import (
-	"fmt"
 	"container/list"
+	"fmt"
 )
 
 type bucket struct {
-	entries  list.List
-        value    uint64
+	entries list.List
+	value   uint64
 }
 
 func newBucket(value uint64) *bucket {
@@ -65,9 +65,9 @@ func (b *bucket) print() {
 			fmt.Println(" ")
 			return
 		}
-		
+
 		fmt.Print(i.Value.(string), " ")
-		
+
 		i = i.Next()
 	}
 }
@@ -94,135 +94,133 @@ func (b *bucket) remove(s string) {
 		if i == nil {
 			panic("tried to remove a non-existent entry")
 		}
-		
+
 		if i.Value.(string) == s {
 			b.entries.Remove(i)
 			return
 		}
-		
+
 		i = i.Next()
 	}
 }
 
-type streamSummary struct {
-	size            int
-	bucket_map      map[string]*bucket
-	value_map       map[uint64]*bucket
-	smallest_value  uint64
+type StreamSummary struct {
+	size          int
+	bucketMap     map[string]*bucket
+	valueMap      map[uint64]*bucket
+	smallestValue uint64
 }
 
-func NewStreamSummary(capacity int) *streamSummary {
-	s := new(streamSummary)
+func NewStreamSummary(capacity int) *StreamSummary {
+	s := new(StreamSummary)
 	s.size = capacity
-	s.bucket_map = make(map[string]*bucket)
-	s.value_map = make(map[uint64]*bucket)
+	s.bucketMap = make(map[string]*bucket)
+	s.valueMap = make(map[uint64]*bucket)
 
 	return s
 }
 
-func (s *streamSummary) Print() {
-	for _, bucket := range s.value_map {
+func (s *StreamSummary) Print() {
+	for _, bucket := range s.valueMap {
 		bucket.print()
-		
 	}
 }
 
-func (s *streamSummary) Exists(item string) bool {
-	_, found := s.bucket_map[item]
+func (s *StreamSummary) Exists(item string) bool {
+	_, found := s.bucketMap[item]
 	return found
 }
 
-func (s *streamSummary) GetStream() []string {
-	ret := make([]string, len(s.bucket_map))
-	
+func (s *StreamSummary) GetStream() []string {
+	ret := make([]string, len(s.bucketMap))
+
 	i := 0
-	for key, _ := range s.bucket_map {
+	for key := range s.bucketMap {
 		ret[i] = key
-		i += 1
+		i++
 	}
 
 	return ret
 }
 
-func (s *streamSummary) Add(item string) {
+func (s *StreamSummary) Add(item string) {
 	// does item already exist?
-	b, found := s.bucket_map[item]
-	
+	b, found := s.bucketMap[item]
+
 	if found {
 		// if so, find old bucket, and remove item
-		old_value := b.getValue()
+		oldValue := b.getValue()
 		b.remove(item)
 		if b.getSize() == 0 {
 			// if old bucket is now empty, remove it
-			delete(s.value_map, old_value)
+			delete(s.valueMap, oldValue)
 
 			// update smallest value if necessary
-			if old_value == s.smallest_value {
-				s.smallest_value = s.smallest_value + 1
+			if oldValue == s.smallestValue {
+				s.smallestValue++
 			}
 		}
 
 		// see if a bucket exists for item's new value
-		new_b, found := s.value_map[old_value + 1]
+		newb, found := s.valueMap[oldValue+1]
 		if found {
 			// it does, so insert it
-			new_b.insert(item)
-			s.bucket_map[item] = new_b
+			newb.insert(item)
+			s.bucketMap[item] = newb
 		} else {
 			// it doesnt, so we'll have to add a new bucket
-			new_bucket := newBucket(old_value + 1)
-			new_bucket.insert(item)
-			s.bucket_map[item] = new_bucket
-			s.value_map[old_value + 1] = new_bucket
+			newbucket := newBucket(oldValue + 1)
+			newbucket.insert(item)
+			s.bucketMap[item] = newbucket
+			s.valueMap[oldValue+1] = newbucket
 		}
-		
-	// are we within allowable capacity?
-	} else if len(s.bucket_map) < s.size {
+	} else if len(s.bucketMap) < s.size {
+		// are we within allowable capacity?
 
-		s.smallest_value = 1
+		s.smallestValue = 1
 
 		// does bucket 1 exist?
-		b1, found := s.value_map[1]
+		b1, found := s.valueMap[1]
 		if found {
 			b1.insert(item)
-			s.bucket_map[item] = b1
+			s.bucketMap[item] = b1
 		} else {
-			new_bucket := newBucket(1)
-			new_bucket.insert(item)
-			s.bucket_map[item] = new_bucket
-			s.value_map[1] = new_bucket
+			newbucket := newBucket(1)
+			newbucket.insert(item)
+			s.bucketMap[item] = newbucket
+			s.valueMap[1] = newbucket
 		}
 	} else {
 		// item didnt already exist, and we are over the size
 		// so we need to evict smallest item,
 		// and use its value + 1 as item to insert's value
-		evict_bucket := s.value_map[s.smallest_value]
-		evict_value := evict_bucket.getValue()
-		evict_item := evict_bucket.getMin()
-		evict_bucket.remove(evict_item)
+		evictBucket := s.valueMap[s.smallestValue]
+		evictValue := evictBucket.getValue()
+		evictItem := evictBucket.getMin()
+		evictBucket.remove(evictItem)
 
 		// remove entry in bucket_map
-		delete(s.bucket_map, evict_item)
+		delete(s.bucketMap, evictItem)
 
 		// if bucket empty, cleanup
-		if evict_bucket.getSize() == 0 {
-			delete(s.value_map, evict_value)
-			
+		if evictBucket.getSize() == 0 {
+			delete(s.valueMap, evictValue)
+
 			// update smallest value if necessary
-			if evict_value == s.smallest_value {
-				s.smallest_value = s.smallest_value + 1
+			if evictValue == s.smallestValue {
+				s.smallestValue++
 			}
 		}
 
-		new_bucket, found := s.value_map[evict_value + 1]
+		newbucket, found := s.valueMap[evictValue+1]
 		if found {
-			new_bucket.insert(item)
-			s.bucket_map[item] = new_bucket
+			newbucket.insert(item)
+			s.bucketMap[item] = newbucket
 		} else {
-			b := newBucket(evict_value + 1)
+			b := newBucket(evictValue + 1)
 			b.insert(item)
-			s.value_map[evict_value + 1] = b
-			s.bucket_map[item] = b
+			s.valueMap[evictValue+1] = b
+			s.bucketMap[item] = b
 		}
 	}
 }
