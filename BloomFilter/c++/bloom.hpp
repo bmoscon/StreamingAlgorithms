@@ -5,7 +5,7 @@
  * Bloom Filter Implementation
  *
  *
- * Copyright (C) 2012  Bryant Moscon - bmoscon@gmail.com
+ * Copyright (C) 2012-2017  Bryant Moscon - bmoscon@gmail.com
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to 
@@ -68,7 +68,7 @@ public:
     hash_list_(hash_list) {}
 
   BloomFilter() : bloom_array_(std::numeric_limits<S>::max(), false),
-		  hash_list_(std::vector<hash_function>(0)) {}
+          hash_list_(std::vector<hash_function>(0)) {}
 
   void setHash(const std::vector<hash_function> &hash_list) {
     hash_list_(hash_list);
@@ -89,7 +89,7 @@ public:
     assert(hash_list_.size());
     for (uint32_t i = 0; i < hash_list_.size(); ++i) {
       if (!bloom_array_[(*hash_list_[i])(s)]) {
-	return (false);
+    return (false);
       }
     }
     

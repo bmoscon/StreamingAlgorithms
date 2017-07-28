@@ -57,62 +57,62 @@
 
 
 uint16_t hash(const std::string &s) {
-  uint32_t ret;
-  uint16_t rc;
-  MurmurHash3_x86_32(s.c_str(), s.length(), 5, &ret);
+    uint32_t ret;
+    uint16_t rc;
+    MurmurHash3_x86_32(s.c_str(), s.length(), 5, &ret);
 
-  memcpy(&rc, &ret, sizeof(uint16_t));
+    memcpy(&rc, &ret, sizeof(uint16_t));
 
-  return rc;
+    return rc;
 }
 
 int main () {
-  std::vector<BloomFilter<uint16_t, std::string>::hash_function> list(1);
-  std::vector<CountingBloomFilter<uint16_t, std::string>::hash_function> list2(1);
+    std::vector<BloomFilter<uint16_t, std::string>::hash_function> list(1);
+    std::vector<CountingBloomFilter<uint16_t, std::string>::hash_function> list2(1);
   
-  list[0] = hash;
-  list2[0] = hash;
-  
-  BloomFilter<uint16_t, std::string>  a(list);
-  std::string b = "abc";
-  
-  std::cout << "Testing Empty Bloom Filter for string \"" << b << "\"\n"; 
-  std::cout << a.exists(b) << std::endl << std::endl;
+    list[0] = hash;
+    list2[0] = hash;
+    
+    BloomFilter<uint16_t, std::string>  a(list);
+    std::string b = "abc";
+    
+    std::cout << "Testing Empty Bloom Filter for string \"" << b << "\"\n"; 
+    std::cout << a.exists(b) << std::endl << std::endl;
 
-  
-  std::cout << "Adding string \"" << b << "\" to Bloom Filter and testing for existence\n"; 
-  a.add(b);
+    
+    std::cout << "Adding string \"" << b << "\" to Bloom Filter and testing for existence\n"; 
+    a.add(b);
 
-  std::cout << a.exists(b) << std::endl << std::endl;
-  
-  
+    std::cout << a.exists(b) << std::endl << std::endl;
+    
+    
 
-  CountingBloomFilter<uint16_t, std::string> count_b(list2, 4);
-  
-  count_b.add(b);
-  count_b.add(b);
-  count_b.remove(b);
-  std::cout << "Adding string \"" << b << "\" to Counting Bloom Filter twice, and removing "
-	    << "once, then testing for existence\n"; 
-  std::cout << count_b.exists(b) << std::endl << std::endl;
+    CountingBloomFilter<uint16_t, std::string> count_b(list2, 4);
+    
+    count_b.add(b);
+    count_b.add(b);
+    count_b.remove(b);
+    std::cout << "Adding string \"" << b << "\" to Counting Bloom Filter twice, and removing "
+        << "once, then testing for existence\n"; 
+    std::cout << count_b.exists(b) << std::endl << std::endl;
 
 
-  std::cout << "Adding string \"" << b << "\" to Spectral Bloom Filter three times and "
-	    << "removing once, then getting occurrences\n"; 
-  SpectralBloomFilter<uint16_t, std::string> spectral_b(list2, 4);
+    std::cout << "Adding string \"" << b << "\" to Spectral Bloom Filter three times and "
+        << "removing once, then getting occurrences\n"; 
+    SpectralBloomFilter<uint16_t, std::string> spectral_b(list2, 4);
 
-  spectral_b.add(b);
-  spectral_b.add(b);
-  spectral_b.add(b);
-  spectral_b.remove(b);
-  
-  std::cout << spectral_b.occurrences(b) << std::endl << std::endl;
+    spectral_b.add(b);
+    spectral_b.add(b);
+    spectral_b.add(b);
+    spectral_b.remove(b);
+    
+    std::cout << spectral_b.occurrences(b) << std::endl << std::endl;
 
-  SpectralBloomFilter<uint16_t, std::string> spectral_b2(count_b);
-  std::cout << "Copying previous Counting Bloom Filter into new Spectral Bloom Filter and "
-	    << "testing existence\n"; 
+    SpectralBloomFilter<uint16_t, std::string> spectral_b2(count_b);
+    std::cout << "Copying previous Counting Bloom Filter into new Spectral Bloom Filter and "
+        << "testing existence\n"; 
 
-  std::cout << spectral_b2.exists(b) << std::endl << std::endl;
-  
-  return 0;
+    std::cout << spectral_b2.exists(b) << std::endl << std::endl;
+    
+    return 0;
 }
