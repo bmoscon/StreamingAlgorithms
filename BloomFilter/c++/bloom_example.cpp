@@ -5,7 +5,7 @@
  * Bloom Filter - Example Usage
  *
  *
- * Copyright (C) 2012  Bryant Moscon - bmoscon@gmail.com
+ * Copyright (C) 2012-2017  Bryant Moscon - bmoscon@gmail.com
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to 
@@ -25,7 +25,7 @@
  *
  * 3. The end-user documentation included with the redistribution, if any, must 
  *    include the following acknowledgment: "This product includes software 
- *    developed by Bryant Moscon (http://www.bryantmoscon.org/)", in the same 
+ *    developed by Bryant Moscon (http://www.bryantmoscon.com/)", in the same 
  *    place and form as other third-party acknowledgments. Alternately, this 
  *    acknowledgment may appear in the software itself, in the same form and 
  *    location as other such third-party acknowledgments.
@@ -53,7 +53,7 @@
 #include "bloom.hpp"
 #include "counting_bloom.hpp"
 #include "spectral_bloom.hpp"
-#include "../hash/MurmurHash3.hpp"
+#include "MurmurHash3.hpp"
 
 
 uint16_t hash(const std::string &s) {
@@ -67,7 +67,6 @@ uint16_t hash(const std::string &s) {
 }
 
 int main () {
-  
   std::vector<BloomFilter<uint16_t, std::string>::hash_function> list(1);
   std::vector<CountingBloomFilter<uint16_t, std::string>::hash_function> list2(1);
   
